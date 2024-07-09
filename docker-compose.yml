@@ -1,0 +1,9 @@
+version: '3.3'
+
+services:
+  comments_aio:
+    build: .
+    container_name: comments_aio
+    environment:
+      - FOO=BAR
+    restart: always
