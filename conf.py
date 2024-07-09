@@ -4,9 +4,9 @@ import sys
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)s: %(message)s",
-    level=logging.DEBUG,
+    level=logging.INFO,
     datefmt="%H:%M:%S",
-    stream=sys.stderr,
+    stream=sys.stdout,
 )
 
 BLOGS_API_URL = os.environ.get("BLOGS_API_URL", "https://jsonplaceholder.typicode.com")

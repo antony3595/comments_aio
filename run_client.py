@@ -4,7 +4,7 @@ import logging
 from aiohttp import ClientSession
 
 import conf
-from clients.json_placeholder_client.client import JsonPlaceholderClient
+from clients.jph_client import JsonPlaceholderClient
 from clients.tcp_client import TCPServerClient
 
 logger = logging.getLogger(__name__)

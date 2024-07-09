@@ -5,7 +5,7 @@ import logging
 import aiohttp
 
 import conf
-from clients.json_placeholder_client.client import JsonPlaceholderClient
+from clients.jph_client import JsonPlaceholderClient
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ async def handle_request(reader, writer):
         updated_data = await update_data(parsed_data)
         writer.write(json.dumps(updated_data).encode())
         await writer.drain()
-        logger.info(f"Server responded with {data}")
+        logger.info(f"Responding with message {data}")
 
     except Exception as e:
         logger.error(repr(e))
