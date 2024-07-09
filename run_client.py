@@ -5,6 +5,7 @@ from aiohttp import ClientSession
 
 import conf
 from clients.json_placeholder_client.client import JsonPlaceholderClient
+from clients.tcp_client import TCPServerClient
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,8 @@ async def consume_comments(q: asyncio.Queue) -> None:
     while True:
         comment = await q.get()
         logger.info(f"Consuming comment {comment['id']}")
-        # TODO send to 2nd component
+        client = TCPServerClient()
+        await client.update_comment(comment)
         q.task_done()
 
 

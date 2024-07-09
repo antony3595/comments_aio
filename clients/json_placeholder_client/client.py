@@ -1,11 +1,9 @@
 from uuid import uuid4
 
-from aiohttp.client import _RequestContextManager
-
-import conf
 import aiohttp
 from aiohttp import ClientSession, ClientResponse
 
+import conf
 from conf import logging
 
 logger = logging.getLogger(__name__)
@@ -56,5 +54,12 @@ class JsonPlaceholderClient:
         method = "GET"
         params = {"postId": post_id}
         response = await self._make_request(session, method, url, params=params, **kwargs)
+
+        return await response.json()
+
+    async def partially_update_post(self, post_id: int, data: dict, session: ClientSession, **kwargs):
+        url = f"{self.API_URL}/posts/{post_id}"
+        method = "PATCH"
+        response = await self._make_request(session, method, url, data=data, **kwargs)
 
         return await response.json()

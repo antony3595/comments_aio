@@ -10,5 +10,8 @@ logging.basicConfig(
 )
 
 BLOGS_API_URL = os.environ.get("BLOGS_API_URL", "https://jsonplaceholder.typicode.com")
-
 CONSUMERS_COUNT = int(os.environ.get("CONSUMERS_COUNT", "10"))
+
+TCP_SERVER_HOST = os.environ.get("TCP_SERVER_HOST", "127.0.0.1")
+TCP_SERVER_PORT = os.environ.get("TCP_SERVER_PORT", "8888")
+
