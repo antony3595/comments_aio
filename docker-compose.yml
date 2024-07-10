@@ -1,9 +1,32 @@
 version: '3.3'
 
 services:
-  comments_aio:
+  comments_aio_server:
     build: .
-    container_name: comments_aio
+    container_name: comments_aio_server
     environment:
-      - FOO=BAR
-    restart: always
+      - TCP_SERVER_HOST=127.0.0.1
+      - TCP_SERVER_PORT=8888
+      - CONSUMERS_COUNT=10
+      - BLOGS_API_URL=https://jsonplaceholder.typicode.com
+    command: sh -c "python3.10 run_server.py"
+    networks:
+      comments_aio_network:
+
+  comments_aio_client:
+    build: .
+    container_name: comments_aio_client
+    environment:
+      - TCP_SERVER_HOST=comments_aio_server
+      - TCP_SERVER_PORT=8888
+      - CONSUMERS_COUNT=10
+      - BLOGS_API_URL=https://jsonplaceholder.typicode.com
+    command: sh -c "python3.10 run_client.py"
+    networks:
+      comments_aio_network:
+    depends_on:
+      comments_aio_server:
+        condition: service_started
+
+networks:
+  comments_aio_network:
