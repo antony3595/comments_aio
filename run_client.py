@@ -7,29 +7,30 @@ from aiohttp import ClientSession
 import conf
 from clients.jph_client import JsonPlaceholderClient
 from clients.tcp_client import TCPServerClient
+from app_types.json_placeholder import Post, Comment
 
 logger = logging.getLogger(__name__)
 
 
-async def produce_comment(comment: dict, queue: asyncio.Queue):
-    logger.info(f"Producing comment {comment['id']}")
+async def produce_comment(comment: Comment, queue: asyncio.Queue):
+    logger.info(f"Producing comment {comment.id}")
     await queue.put(comment)
 
 
 async def consume_comments(q: asyncio.Queue) -> None:
     while True:
         comment = await q.get()
-        logger.info(f"Consuming comment {comment['id']}")
+        logger.info(f"Consuming comment {comment.id}")
         client = TCPServerClient()
         await client.update_comment(comment)
         q.task_done()
 
 
-async def process_post_comments(post_id: int, session: ClientSession, queue: asyncio.Queue):
+async def process_post_comments(post: Post, session: ClientSession, queue: asyncio.Queue):
     client = JsonPlaceholderClient()
     comments = []
     try:
-        comments = await client.get_post_comments(post_id, session)
+        comments = await client.get_post_comments(post.id, session)
     except Exception as e:
         logger.exception(
             "Non-aiohttp exception occured:  %s", getattr(e, "__dict__", {})
@@ -56,7 +57,7 @@ async def main():
     async with ClientSession() as session:
         posts = await client.get_posts(session)
         for post in posts:
-            post_comments_tasks.append(process_post_comments(post["id"], session, queue=queue))
+            post_comments_tasks.append(process_post_comments(post, session, queue=queue))
 
         await asyncio.gather(*post_comments_tasks)
     await queue.join()
