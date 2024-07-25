@@ -63,7 +63,7 @@ async def main():
     await queue.join()
     for c in consumers:
         c.cancel()
-    end = time.perf_counter() - start
+    duration = time.perf_counter() - start
     logger.info(f"Program completed in {end:0.2f} seconds.")
 
 
