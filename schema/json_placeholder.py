@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, PositiveInt, Field
 
 
@@ -12,9 +10,9 @@ class Post(BaseModel):
 
 class PostPatchDTO(BaseModel):
     id: PositiveInt
-    userId: Optional[PositiveInt] = Field(default=None)
-    title: Optional[str] = Field(default=None)
-    body: Optional[str] = Field(default=None)
+    userId: PositiveInt | None = Field(default=None)
+    title: str | None = Field(default=None)
+    body: str | None = Field(default=None)
 
 
 class Comment(BaseModel):

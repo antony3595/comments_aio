@@ -3,11 +3,12 @@ import logging
 import time
 
 from aiohttp import ClientSession
+from pydantic import ValidationError
 
 import conf
 from clients.jph_client import JsonPlaceholderClient
 from clients.tcp_client import TCPServerClient
-from app_types.json_placeholder import Post, Comment
+from schema.json_placeholder import Post, Comment
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,11 @@ async def consume_comments(q: asyncio.Queue) -> None:
         comment = await q.get()
         logger.info(f"Consuming comment {comment.id}")
         client = TCPServerClient()
-        await client.update_comment(comment)
+        try:
+            await client.update_post_by_comment(comment)
+        except ValidationError as e:
+            logger.error(f"TCP server error: {repr(e)}")
+
         q.task_done()
 
 
@@ -64,7 +69,7 @@ async def main():
     for c in consumers:
         c.cancel()
     duration = time.perf_counter() - start
-    logger.info(f"Program completed in {end:0.2f} seconds.")
+    logger.info(f"Program completed in {duration:0.2f} seconds.")
 
 
 if __name__ == '__main__':

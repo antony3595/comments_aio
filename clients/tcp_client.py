@@ -2,8 +2,8 @@ import asyncio
 import logging
 
 import conf
-from app_types.json_placeholder import Comment
-from app_types.tcp_server import ClientCommentRequestDTO
+from schema.json_placeholder import Comment, Post
+from schema.tcp_server import ClientCommentRequestDTO
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class TCPConnection:
 
 
 class TCPServerClient:
-    async def update_comment(self, comment: Comment):
+    async def update_post_by_comment(self, comment: Comment) -> Post:
         dto = ClientCommentRequestDTO(**comment.model_dump(include={'postId', 'id', 'email'}))
 
         async with TCPConnection() as conn:
@@ -35,4 +35,5 @@ class TCPServerClient:
             response = await conn.reader.read(1000)
             decoded = response.decode()
             logger.info(f"Server responded with: {response}")
-            return decoded
+            post = Post.model_validate_json(decoded)
+            return post

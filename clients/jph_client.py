@@ -5,7 +5,7 @@ from aiohttp import ClientSession
 import conf
 from clients.base import BaseHttpClient
 from conf import logging
-from app_types.json_placeholder import Post, Comment, PostPatchDTO
+from schema.json_placeholder import Post, Comment, PostPatchDTO
 
 logger = logging.getLogger(__name__)
 
