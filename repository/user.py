@@ -14,3 +14,7 @@ class UserRepository(BaseRepository):
     def create(self, query: UserSchema):
         USERS_TABLE.append(query.model_dump())
         return query
+
+
+def get_user_repository() -> UserRepository:
+    return UserRepository()

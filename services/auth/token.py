@@ -72,3 +72,7 @@ class TokenService:
         bytes_str = input.encode('ascii')
         base64str = base64.urlsafe_b64encode(bytes_str).decode('utf-8')
         return base64str
+
+
+def get_token_service() -> TokenService:
+    return TokenService()
