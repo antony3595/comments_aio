@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 
 from aiohttp import ClientSession
 
@@ -45,6 +46,8 @@ async def start_consumers(queue: asyncio.Queue):
 
 
 async def main():
+    start = time.perf_counter()
+
     client = JsonPlaceholderClient()
     post_comments_tasks = []
     queue = asyncio.Queue()
@@ -59,6 +62,8 @@ async def main():
     await queue.join()
     for c in consumers:
         c.cancel()
+    duration = time.perf_counter() - start
+    logger.info(f"Program completed in {end:0.2f} seconds.")
 
 
 if __name__ == '__main__':

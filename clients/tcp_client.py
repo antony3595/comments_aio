@@ -29,7 +29,7 @@ class TCPServerClient:
             conn.writer.write(json.dumps(data).encode())
             await conn.writer.drain()
 
-            response = await conn.reader.read()
+            response = await conn.reader.read(1000)
             decoded = response.decode()
             logger.info(f"Server responded with: {response}")
             return decoded

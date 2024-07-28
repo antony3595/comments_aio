@@ -7,9 +7,8 @@ COPY requirements.txt .
 
 RUN python -m  pip install -r requirements.txt
 
-COPY docker/supervisord.conf /etc/supervisord.conf
 COPY . .
 RUN pwd
 RUN ls -la
 
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["echo", "Specify the command to run at the docker-compose.yml file"]
