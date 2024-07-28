@@ -1,44 +1,49 @@
 import asyncio
-import json
 import logging
 
 import aiohttp
+from pydantic import ValidationError
 
 import conf
+from schema.json_placeholder import PostPatchDTO
+from schema.tcp_server import ServerCommentRequestDTO
 from clients.jph_client import JsonPlaceholderClient
 
 logger = logging.getLogger(__name__)
 
 
-def validate_data(data: dict):
-    assert isinstance(data, dict) and data.get("id"), "Invalid data"
-
-
-async def update_data(validated_data: dict):
+async def update_post_by_comment(post: ServerCommentRequestDTO) -> PostPatchDTO:
     async with aiohttp.ClientSession() as session:
         client = JsonPlaceholderClient()
-        post_id = validated_data["postId"]
-        response_data = await client.partially_update_post(post_id, {"title": "foo"}, session)
+
+        post_patch_dto = PostPatchDTO.model_validate({"id": post.postId})
+        post_patch_dto.title = "Updated post title"
+        response_data = await client.partially_update_post(post_patch_dto, session)
         return response_data
 
 
 async def handle_request(reader, writer):
     data = await reader.read(1000)
     message = data.decode()
-    parsed_data = json.loads(message)
+
     logger.info(f"Server got message: {message}")
 
     try:
-        validate_data(parsed_data)
+        post = ServerCommentRequestDTO.model_validate_json(data)
+        updated_data = await update_post_by_comment(post)
+        logger.info(f"Responding with message {updated_data.model_dump_json()}")
+        writer.write(updated_data.model_dump_json().encode())
 
-        updated_data = await update_data(parsed_data)
-        writer.write(json.dumps(updated_data).encode())
-        await writer.drain()
-        logger.info(f"Responding with message {data}")
+    except ValidationError as e:
+        logger.error(e.json())
+        writer.write(e.json().encode())
 
     except Exception as e:
-        logger.error(repr(e))
+        logger.error(repr(e).encode())
+        writer.write(repr(e).encode())
+
     finally:
+        await writer.drain()
         writer.close()
         logger.info(f"Server closing connection")
         await writer.wait_closed()
