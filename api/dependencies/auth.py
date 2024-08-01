@@ -13,7 +13,7 @@ from services.auth.token import TokenService, get_token_service
 
 class ApiKeyAuth:
     def __init__(self, api_key: str = Security(APIKeyHeader(name="Authorization"))):
-        if api_key != conf.API_KEY:
+        if api_key != conf.settings.API_KEY.get_secret_value():
             raise HTTPException(status_code=403, detail="Invalid API key")
 
 

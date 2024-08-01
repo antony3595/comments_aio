@@ -53,7 +53,7 @@ class TokenService:
         return TokenPayload(**payload_json)
 
     def _generate_signature(self, unsigned_token: str) -> str:
-        signature = hmac.new(conf.SECRET_KEY.encode(), unsigned_token.encode(), hashlib.sha256).hexdigest()
+        signature = hmac.new(conf.settings.SECRET_KEY.get_secret_value().encode(), unsigned_token.encode(), hashlib.sha256).hexdigest()
         return self._base64url_encode(signature)
 
     def is_signature_valid(self, token: str) -> bool:

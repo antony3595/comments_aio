@@ -15,8 +15,8 @@ class UserTokenRequest(BaseModel):
 
     @field_validator("minutes")
     def minutes_not_greater_than_max_ttl(cls, value: int):
-        if value > conf.TOKEN_MAX_TTL:
-            raise ValidationError("TTL cant be greater than {}".format(conf.TOKEN_MAX_TTL))
+        if value > conf.settings.TOKEN_MAX_TTL:
+            raise ValidationError("TTL cant be greater than {}".format(conf.settings.TOKEN_MAX_TTL))
         return value
 
 

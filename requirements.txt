@@ -2,3 +2,4 @@ aiohttp==3.9.5
 pydantic==2.8.2
 fastapi[all]
 requests
+pydantic-settings==2.4.0

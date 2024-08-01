@@ -20,7 +20,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root(api_key: str = Header()):
-    if api_key != conf.API_KEY:
+    if api_key != conf.settings.API_KEY.get_secret_value():
         raise HTTPException(status_code=403, detail="Invalid API key")
 
     return {"message": "Hello World"}

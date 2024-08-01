@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class JsonPlaceholderClient(BaseHttpClient):
-    API_URL = conf.BLOGS_API_URL
+    API_URL = conf.settings.BLOGS_API_URL
 
     async def get_posts(self, session: ClientSession, **kwargs) -> List[Post]:
         url = f"{self.API_URL}/posts"

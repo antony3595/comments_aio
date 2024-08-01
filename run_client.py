@@ -27,6 +27,8 @@ async def consume_comments(q: asyncio.Queue) -> None:
             await client.update_post_by_comment(comment)
         except ValidationError as e:
             logger.error(f"TCP server error: {repr(e)}")
+        except Exception as e:
+            logger.error(f"Consuming error: {repr(e)}")
 
         q.task_done()
 
@@ -46,8 +48,8 @@ async def process_post_comments(post: Post, session: ClientSession, queue: async
 
 
 async def start_consumers(queue: asyncio.Queue):
-    consumers = [asyncio.create_task(consume_comments(queue)) for n in range(int(conf.CONSUMERS_COUNT))]
-    logger.info(f"Starting {conf.CONSUMERS_COUNT} consumers")
+    consumers = [asyncio.create_task(consume_comments(queue)) for n in range(int(conf.settings.CONSUMERS_COUNT))]
+    logger.info(f"Starting {conf.settings.CONSUMERS_COUNT} consumers")
     return consumers
 
 
