@@ -2,11 +2,10 @@ import asyncio
 import logging
 import time
 
-from aiohttp import ClientSession
 from pydantic import ValidationError
 
 import conf
-from clients.jph_client import JsonPlaceholderClient
+from clients.jph_client import get_json_placeholder_client
 from clients.tcp_client import TCPServerClient
 from schema.json_placeholder import Post, Comment
 
@@ -33,15 +32,15 @@ async def consume_comments(q: asyncio.Queue) -> None:
         q.task_done()
 
 
-async def process_post_comments(post: Post, session: ClientSession, queue: asyncio.Queue):
-    client = JsonPlaceholderClient()
-    comments = []
-    try:
-        comments = await client.get_post_comments(post.id, session)
-    except Exception as e:
-        logger.exception(
-            "Non-aiohttp exception occured:  %s", getattr(e, "__dict__", {})
-        )
+async def process_post_comments(post: Post, queue: asyncio.Queue):
+    async with get_json_placeholder_client() as client:
+        comments = []
+        try:
+            comments = await client.get_post_comments(post.id)
+        except Exception as e:
+            logger.exception(
+                "Non-aiohttp exception occured:  %s", getattr(e, "__dict__", {})
+            )
 
     producers = [produce_comment(comment, queue) for comment in comments]
     await asyncio.gather(*producers)
@@ -56,17 +55,16 @@ async def start_consumers(queue: asyncio.Queue):
 async def main():
     start = time.perf_counter()
 
-    client = JsonPlaceholderClient()
     post_comments_tasks = []
     queue = asyncio.Queue()
     consumers = await start_consumers(queue)
 
-    async with ClientSession() as session:
-        posts = await client.get_posts(session)
+    async with get_json_placeholder_client() as client:
+        posts = await client.get_posts()
         for post in posts:
-            post_comments_tasks.append(process_post_comments(post, session, queue=queue))
+            post_comments_tasks.append(process_post_comments(post, queue=queue))
 
-        await asyncio.gather(*post_comments_tasks)
+    await asyncio.gather(*post_comments_tasks)
     await queue.join()
     for c in consumers:
         c.cancel()

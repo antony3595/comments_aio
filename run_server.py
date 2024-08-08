@@ -7,18 +7,16 @@ from pydantic import ValidationError
 import conf
 from schema.json_placeholder import PostPatchDTO
 from schema.tcp_server import ServerCommentRequestDTO
-from clients.jph_client import JsonPlaceholderClient
+from clients.jph_client import JsonPlaceholderClient, get_json_placeholder_client
 
 logger = logging.getLogger(__name__)
 
 
 async def update_post_by_comment(post: ServerCommentRequestDTO) -> PostPatchDTO:
-    async with aiohttp.ClientSession() as session:
-        client = JsonPlaceholderClient()
-
+    async with get_json_placeholder_client() as client:
         post_patch_dto = PostPatchDTO.model_validate({"id": post.postId})
         post_patch_dto.title = "Updated post title"
-        response_data = await client.partially_update_post(post_patch_dto, session)
+        response_data = await client.partially_update_post(post_patch_dto)
         return response_data
 
 
