@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic import BaseModel, Field
 
 
-@dataclass
 class NewsFields:
     id: int = Field()
     title: str = Field(description="Title")

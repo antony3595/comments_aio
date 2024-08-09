@@ -19,14 +19,6 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 
-@app.get("/")
-async def root(api_key: str = Header()):
-    if api_key != conf.API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid API key")
-
-    return {"message": "Hello World"}
-
-
 @app.post("/auth", response_model=UserTokenResponse)
 async def auth(data: UserTokenRequest = Body(), api_key: str = Header()) -> UserTokenResponse:
     if api_key != conf.API_KEY:
@@ -43,7 +35,7 @@ async def auth(data: UserTokenRequest = Body(), api_key: str = Header()) -> User
             full_name=data.full_name,
         ))
 
-    token_payload = BaseTokenPayload(id=user.id, **data.model_dump(exclude={"minutes"}))
+    token_payload = BaseTokenPayload(id=user.id, **data.model_dump(include={"full_name", "email", "minutes", "scope", }))
     token = TokenService().generate_token(token_payload, data.minutes)
 
     logger.info(f"Token generated for \"{data.model_dump_json()}\" request body")

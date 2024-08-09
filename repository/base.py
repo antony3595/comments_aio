@@ -1,8 +1,7 @@
-import abc
 from abc import abstractmethod
 
 
-class BaseRepository(abc.ABC):
+class BaseRepository:
     @abstractmethod
     def read(self, *args, **kwargs):
         ...

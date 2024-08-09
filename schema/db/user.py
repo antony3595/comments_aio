@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 from uuid import uuid4
 
 from pydantic import BaseModel, EmailStr, Field
 
 
-@dataclass
 class UserFields:
     id: str = Field(default_factory=lambda: uuid4().hex)
     full_name: str = Field(description="Username")
