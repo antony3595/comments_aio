@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from fastapi import FastAPI, Header, HTTPException, Body, Security
 from fastapi.security import APIKeyHeader
@@ -7,6 +8,7 @@ import conf
 from repository.enums.scope import Scope
 from repository.news import NewsRepository
 from schema.api.auth import UserTokenRequest, UserTokenResponse, BaseTokenPayload
+from schema.db.news import NewsSchema
 from schema.db.user import UserSchema
 from schema.query.user import UserEmailQuery
 from repository.user import UserRepository
@@ -26,7 +28,7 @@ async def root(api_key: str = Header()):
 
 
 @app.post("/auth", response_model=UserTokenResponse)
-async def auth(data: UserTokenRequest = Body(), api_key: str = Header()):
+async def auth(data: UserTokenRequest = Body(), api_key: str = Header()) -> UserTokenResponse:
     if api_key != conf.API_KEY:
         raise HTTPException(status_code=403, detail="Invalid API key")
 
@@ -49,11 +51,11 @@ async def auth(data: UserTokenRequest = Body(), api_key: str = Header()):
     return UserTokenResponse(token=token)
 
 
-@app.get("/news", )
-async def get_news(authorization: str = Security(APIKeyHeader(name="Authorization"))):
+@app.get("/news", response_model=List[NewsSchema])
+async def get_news(authorization: str = Security(APIKeyHeader(name="Authorization"))) -> List[NewsSchema]:
     token_service = TokenService()
     token_service.validate_token(authorization, [Scope.NEWS])
-    token_payload = token_service.get_token_payload(authorization)
+    token_payload = token_service.parse_token(authorization)
 
     logger.info(f"User {token_payload.id} got news response")
 
