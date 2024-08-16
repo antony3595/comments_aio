@@ -22,7 +22,7 @@ async def jwt_token_auth(token: str = Security(APIKeyHeader(name="Authorization"
                          user_repository: UserRepository = Depends(get_user_repository)
                          ) -> UserSchema:
     token_service.validate_token(token, [])
-    token_payload = token_service.get_token_payload(token)
+    token_payload = token_service.parse_token(token)
 
     user = user_repository.read(query=UserEmailQuery(email=token_payload.email))
     if not user:
@@ -40,7 +40,7 @@ class JWTTokenScopeAuth:
                  user_repository: UserRepository = Depends(get_user_repository)
                  ):
         token_service.validate_token(token, required_scope=self.required_scope)
-        token_payload = token_service.get_token_payload(token)
+        token_payload = token_service.parse_token(token)
 
         user = user_repository.read(query=UserEmailQuery(email=token_payload.email))
         if not user:

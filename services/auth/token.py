@@ -34,7 +34,7 @@ class TokenService:
         if not self.is_signature_valid(token):
             raise HTTPException(detail="Invalid token", status_code=401)
 
-        payload = self.get_token_payload(token)
+        payload = self.parse_token(token)
         now = datetime.now().timestamp()
 
         if payload.exp < now:
@@ -47,7 +47,7 @@ class TokenService:
         if not UserRepository().read(query=UserEmailQuery(email=payload.email)):
             raise HTTPException(detail="No user with given token", status_code=403)
 
-    def get_token_payload(self, token: str) -> TokenPayload:
+    def parse_token(self, token: str) -> TokenPayload:
         payload_segment = token.split(".")[1]
         payload_json = json.loads(self._base64url_decode(payload_segment))
         return TokenPayload(**payload_json)

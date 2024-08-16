@@ -26,5 +26,15 @@ services:
       comments_aio_server:
         condition: service_started
 
+
+  comments_aio_api:
+    build: .
+    container_name: comments_aio_api
+    command: sh -c "python3.10 -m uvicorn app:app --host 0.0.0.0  --port 8000"
+    ports:
+      - "8000:8000"
+    networks:
+      comments_aio_network:
+
 networks:
   comments_aio_network:
