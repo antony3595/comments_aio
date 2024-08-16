@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 class TCPConnection:
     async def __aenter__(self):
-        logger.info(f"Opening TCP connection {conf.TCP_SERVER_HOST}:{conf.TCP_SERVER_PORT}")
+        logger.info(f"Opening TCP connection {conf.settings.TCP_SERVER_HOST}:{conf.settings.TCP_SERVER_PORT}")
 
-        reader, writer = await asyncio.open_connection(conf.TCP_SERVER_HOST, conf.TCP_SERVER_PORT)
+        reader, writer = await asyncio.open_connection(conf.settings.TCP_SERVER_HOST, conf.settings.TCP_SERVER_PORT)
 
         self.reader = reader
         self.writer = writer
@@ -20,7 +20,7 @@ class TCPConnection:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.writer.close()
-        logger.info(f"Closing TCP connection {conf.TCP_SERVER_HOST}:{conf.TCP_SERVER_PORT}")
+        logger.info(f"Closing TCP connection {conf.settings.TCP_SERVER_HOST}:{conf.settings.TCP_SERVER_PORT}")
         await self.writer.wait_closed()
 
 

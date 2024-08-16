@@ -1,8 +1,12 @@
 import logging
 import os
 import sys
+from pprint import pprint
 
 from pydantic import SecretStr
+from pydantic_settings import BaseSettings
+
+__all__ = ["settings"]
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)s: %(message)s",
@@ -11,13 +15,16 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-BLOGS_API_URL = os.environ.get("BLOGS_API_URL", "https://jsonplaceholder.typicode.com")
-CONSUMERS_COUNT = int(os.environ.get("CONSUMERS_COUNT", "10"))
 
-TCP_SERVER_HOST = os.environ.get("TCP_SERVER_HOST", "0.0.0.0")
-TCP_SERVER_PORT = os.environ.get("TCP_SERVER_PORT", "8888")
+class Settings(BaseSettings):
+    BLOGS_API_URL: str = "https://jsonplaceholder.typicode.com"
+    CONSUMERS_COUNT: int = 10
+    TCP_SERVER_HOST: str = "0.0.0.0"
+    TCP_SERVER_PORT: str = "8888"
+    TOKEN_MAX_TTL: int = 30
+    API_KEY: SecretStr = os.environ.get("API_KEY", "123")
+    SECRET_KEY: SecretStr = os.environ.get("SECRET_KEY", "123")
 
-TOKEN_MAX_TTL: int = 30
 
-API_KEY: SecretStr = os.environ.get("API_KEY", "123")
-SECRET_KEY = os.environ.get("SECRET_KEY", "123")
+settings = Settings()
+pprint(settings.dict())
