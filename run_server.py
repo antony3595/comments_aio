@@ -4,7 +4,7 @@ import logging
 import aiohttp
 from pydantic import ValidationError
 
-import conf
+import config
 from schema.json_placeholder import PostPatchDTO
 from schema.tcp_server import ServerCommentRequestDTO
 from clients.jph_client import JsonPlaceholderClient, get_json_placeholder_client
@@ -48,10 +48,10 @@ async def handle_request(reader, writer):
 
 
 async def main():
-    logger.info(f"Running server on {conf.settings.TCP_SERVER_HOST}:{conf.settings.TCP_SERVER_PORT}")
+    logger.info(f"Running server on {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}")
 
     server = await asyncio.start_server(
-        handle_request, conf.settings.TCP_SERVER_HOST, conf.settings.TCP_SERVER_PORT)
+        handle_request, config.settings.TCP_SERVER_HOST, config.settings.TCP_SERVER_PORT)
     async with server:
         await server.serve_forever()
 

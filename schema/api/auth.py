@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import EmailStr, Field, field_validator, ValidationError, BaseModel
 
-import conf
+import config
 from repository.enums.scope import Scope
 from schema.db.user import UserFields
 
@@ -10,13 +10,13 @@ from schema.db.user import UserFields
 class UserTokenRequest(BaseModel):
     full_name: str = UserFields.full_name
     email: EmailStr = UserFields.email
-    minutes: int = Field(description="TTL in minutes", default=30)
+    seconds: int = Field(description="TTL in seconds", default=30)
     scope: List[Scope] = Field(description="Token access scope")
 
-    @field_validator("minutes")
-    def minutes_not_greater_than_max_ttl(cls, value: int):
-        if value > conf.settings.TOKEN_MAX_TTL:
-            raise ValidationError("TTL cant be greater than {}".format(conf.settings.TOKEN_MAX_TTL))
+    @field_validator("seconds")
+    def is_token_ttl_valid(cls, value: int):
+        if value > config.settings.TOKEN_MAX_TTL:
+            raise ValidationError("TTL cant be greater than {}".format(config.settings.TOKEN_MAX_TTL))
         return value
 
 

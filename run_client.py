@@ -4,7 +4,7 @@ import time
 
 from pydantic import ValidationError
 
-import conf
+import config
 from clients.jph_client import get_json_placeholder_client
 from clients.tcp_client import TCPServerClient
 from schema.json_placeholder import Post, Comment
@@ -47,8 +47,8 @@ async def process_post_comments(post: Post, queue: asyncio.Queue):
 
 
 async def start_consumers(queue: asyncio.Queue):
-    consumers = [asyncio.create_task(consume_comments(queue)) for n in range(int(conf.settings.CONSUMERS_COUNT))]
-    logger.info(f"Starting {conf.settings.CONSUMERS_COUNT} consumers")
+    consumers = [asyncio.create_task(consume_comments(queue)) for n in range(int(config.settings.CONSUMERS_COUNT))]
+    logger.info(f"Starting {config.settings.CONSUMERS_COUNT} consumers")
     return consumers
 
 

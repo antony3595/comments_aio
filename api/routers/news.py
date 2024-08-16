@@ -14,6 +14,6 @@ news_router = APIRouter(prefix="/news")
 
 
 @news_router.get("/", response_model=list[NewsSchema])
-async def get_news(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))]):
+async def get_news(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))]) -> list[NewsSchema]:
     logger.info(f"User {user.email} got news response")
     return NewsRepository().read_all()

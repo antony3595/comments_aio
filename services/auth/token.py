@@ -7,16 +7,16 @@ from typing import List
 
 from fastapi import HTTPException
 
-import conf
+import config
 from repository.enums.scope import Scope
 from repository.user import UserRepository
 from schema.api.auth import TokenPayload, BaseTokenPayload
 from schema.query.user import UserEmailQuery
 
 
-class TokenService:
+class AuthorizationService:
     def generate_token(self, payload: BaseTokenPayload, ttl: int) -> str:
-        expire_dt = datetime.now() + timedelta(minutes=ttl)
+        expire_dt = datetime.now() + timedelta(seconds=ttl)
         header = {"alg": "HS256", "typ": "JWT"}
 
         payload = TokenPayload(exp=expire_dt.timestamp(), **payload.model_dump())
@@ -31,7 +31,7 @@ class TokenService:
         if not token:
             raise HTTPException(detail="Unauthorized", status_code=401)
 
-        if not self.is_signature_valid(token):
+        if token.split(".") != 3 and not self.is_signature_valid(token):
             raise HTTPException(detail="Invalid token", status_code=401)
 
         payload = self.parse_token(token)
@@ -53,7 +53,7 @@ class TokenService:
         return TokenPayload(**payload_json)
 
     def _generate_signature(self, unsigned_token: str) -> str:
-        signature = hmac.new(conf.settings.SECRET_KEY.get_secret_value().encode(), unsigned_token.encode(), hashlib.sha256).hexdigest()
+        signature = hmac.new(config.settings.SECRET_KEY.get_secret_value().encode(), unsigned_token.encode(), hashlib.sha256).hexdigest()
         return self._base64url_encode(signature)
 
     def is_signature_valid(self, token: str) -> bool:
@@ -74,5 +74,5 @@ class TokenService:
         return base64str
 
 
-def get_token_service() -> TokenService:
-    return TokenService()
+def get_token_service() -> AuthorizationService:
+    return AuthorizationService()

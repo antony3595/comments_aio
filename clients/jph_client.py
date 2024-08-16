@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 from typing import List
 
-import conf
+import config
 from clients.base import BaseAsyncHttpClient
-from conf import logging
+from config import logging
 from schema.json_placeholder import Post, Comment, PostPatchDTO
 
 logger = logging.getLogger(__name__)
@@ -41,5 +41,5 @@ class JsonPlaceholderClient(BaseAsyncHttpClient):
 
 @asynccontextmanager
 async def get_json_placeholder_client() -> JsonPlaceholderClient:
-    async with JsonPlaceholderClient(base_url=conf.settings.BLOGS_API_URL) as client:
+    async with JsonPlaceholderClient(base_url=config.settings.BLOGS_API_URL) as client:
         yield client

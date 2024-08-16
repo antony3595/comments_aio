@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pprint import pprint
 
@@ -21,9 +20,9 @@ class Settings(BaseSettings):
     CONSUMERS_COUNT: int = 10
     TCP_SERVER_HOST: str = "0.0.0.0"
     TCP_SERVER_PORT: str = "8888"
-    TOKEN_MAX_TTL: int = 30
-    API_KEY: SecretStr = os.environ.get("API_KEY", "123")
-    SECRET_KEY: SecretStr = os.environ.get("SECRET_KEY", "123")
+    TOKEN_MAX_TTL: int = 1800
+    API_KEY: SecretStr = "123"
+    SECRET_KEY: SecretStr = "123"
 
 
 settings = Settings()
