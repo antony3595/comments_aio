@@ -1,13 +1,12 @@
 import asyncio
 import logging
 
-import aiohttp
 from pydantic import ValidationError
 
 import config
+from clients.jph_client import get_json_placeholder_client
 from schema.json_placeholder import PostPatchDTO
 from schema.tcp_server import ServerCommentRequestDTO
-from clients.jph_client import JsonPlaceholderClient, get_json_placeholder_client
 
 logger = logging.getLogger(__name__)
 

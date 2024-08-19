@@ -7,7 +7,7 @@ from repository.user import UserRepository
 from schema.api.auth import UserTokenResponse, UserTokenRequest, BaseTokenPayload
 from schema.db.user import UserSchema
 from schema.query.user import UserEmailQuery
-from services.auth.token import AuthorizationService
+from services.auth.authorizaton import AuthService
 
 logger = logging.getLogger(__name__)
 auth_router = APIRouter(prefix="/auth")
@@ -25,7 +25,7 @@ async def auth(data: UserTokenRequest = Body(),
             full_name=data.full_name,
         ))
 
-    token = AuthorizationService().generate_token(
+    token = AuthService().generate_token(
         payload=BaseTokenPayload(id=user.id, **data.model_dump(exclude={"seconds"})),
         ttl=data.seconds)
 

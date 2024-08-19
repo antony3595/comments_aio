@@ -8,7 +8,8 @@ from repository.enums.scope import Scope
 from repository.user import UserRepository, get_user_repository
 from schema.db.user import UserSchema
 from schema.query.user import UserEmailQuery
-from services.auth.token import AuthorizationService, get_token_service
+from services.auth.authorizaton import AuthService, get_auth_service
+from services.auth.exceptions import AuthorizationException, AuthenticationException
 
 
 class ApiKeyAuth:
@@ -18,11 +19,11 @@ class ApiKeyAuth:
 
 
 async def jwt_token_auth(token: str = Security(APIKeyHeader(name="Authorization")),
-                         token_service: AuthorizationService = Depends(get_token_service),
+                         auth_service: AuthService = Depends(get_auth_service),
                          user_repository: UserRepository = Depends(get_user_repository)
                          ) -> UserSchema:
-    token_service.validate_token(token, [])
-    token_payload = token_service.parse_token(token)
+    auth_service.validate_token(token, [])
+    token_payload = auth_service.parse_token(token)
 
     user = user_repository.read(query=UserEmailQuery(email=token_payload.email))
     if not user:
@@ -36,11 +37,19 @@ class JWTTokenScopeAuth:
         self.required_scope = required_scope
 
     def __call__(self, token: str = Security(APIKeyHeader(name="Authorization")),
-                 token_service: AuthorizationService = Depends(get_token_service),
+                 token_service: AuthService = Depends(get_auth_service),
                  user_repository: UserRepository = Depends(get_user_repository)
                  ):
-        token_service.validate_token(token, required_scope=self.required_scope)
-        token_payload = token_service.parse_token(token)
+
+        try:
+            token_service.validate_token(token, required_scope=self.required_scope)
+            token_payload = token_service.parse_token(token)
+
+        except AuthorizationException as e:
+            raise HTTPException(detail=e.message, status_code=401)
+
+        except AuthenticationException as e:
+            raise HTTPException(detail=e.message, status_code=403)
 
         user = user_repository.read(query=UserEmailQuery(email=token_payload.email))
         if not user:
