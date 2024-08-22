@@ -5,18 +5,17 @@ import json
 from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import HTTPException
-
-import conf
+import config
 from repository.enums.scope import Scope
 from repository.user import UserRepository
 from schema.api.auth import TokenPayload, BaseTokenPayload
 from schema.query.user import UserEmailQuery
+from services.auth.exceptions import AuthorizationServiceException, AuthorizationException, AuthenticationException
 
 
-class TokenService:
+class AuthService:
     def generate_token(self, payload: BaseTokenPayload, ttl: int) -> str:
-        expire_dt = datetime.now() + timedelta(minutes=ttl)
+        expire_dt = datetime.now() + timedelta(seconds=ttl)
         header = {"alg": "HS256", "typ": "JWT"}
 
         payload = TokenPayload(exp=expire_dt.timestamp(), **payload.model_dump())
@@ -29,23 +28,23 @@ class TokenService:
     def validate_token(self, token: str, required_scope: List[Scope]):
 
         if not token:
-            raise HTTPException(detail="Unauthorized", status_code=401)
+            raise AuthorizationException(message="Unauthorized")
 
-        if not self.is_signature_valid(token):
-            raise HTTPException(detail="Invalid token", status_code=401)
+        if len(token.split(".")) != 3 or not self.is_signature_valid(token):
+            raise AuthorizationException(message="Invalid token")
 
-        payload = self.parse_token(token)
+        token_payload = self.parse_token(token)
         now = datetime.now().timestamp()
 
-        if payload.exp < now:
-            raise HTTPException(detail="Token expired", status_code=401)
+        if token_payload.exp < now:
+            raise AuthorizationException(message="Token expired")
 
-        has_scope = any([scope_item in payload.scope for scope_item in required_scope])
+        has_scope = any([scope_item in token_payload.scope for scope_item in required_scope])
         if not has_scope:
-            raise HTTPException(detail="Forbidden", status_code=403)
+            raise AuthenticationException(message="Forbidden")
 
-        if not UserRepository().read(query=UserEmailQuery(email=payload.email)):
-            raise HTTPException(detail="No user with given token", status_code=403)
+        if not UserRepository().read(query=UserEmailQuery(email=token_payload.email)):
+            raise AuthorizationServiceException(message="No user with given token")
 
     def parse_token(self, token: str) -> TokenPayload:
         payload_segment = token.split(".")[1]
@@ -53,7 +52,7 @@ class TokenService:
         return TokenPayload(**payload_json)
 
     def _generate_signature(self, unsigned_token: str) -> str:
-        signature = hmac.new(conf.SECRET_KEY.encode(), unsigned_token.encode(), hashlib.sha256).hexdigest()
+        signature = hmac.new(config.settings.SECRET_KEY.get_secret_value().encode(), unsigned_token.encode(), hashlib.sha256).hexdigest()
         return self._base64url_encode(signature)
 
     def is_signature_valid(self, token: str) -> bool:
@@ -72,3 +71,7 @@ class TokenService:
         bytes_str = input.encode('ascii')
         base64str = base64.urlsafe_b64encode(bytes_str).decode('utf-8')
         return base64str
+
+
+def get_auth_service() -> AuthService:
+    return AuthService()
