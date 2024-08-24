@@ -14,7 +14,8 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
     networks:
-      - backend
+      comments_aio_network:
+
 
 networks:
-  backend:
+  comments_aio_network:
