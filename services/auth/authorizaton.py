@@ -5,6 +5,8 @@ import json
 from datetime import datetime, timedelta
 from typing import List
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 import config
 from repository.enums.scope import Scope
 from repository.user import UserRepository
@@ -25,7 +27,7 @@ class AuthService:
         token = unsigned_token + "." + signature
         return token
 
-    def validate_token(self, token: str, required_scope: List[Scope]):
+    def validate_token(self, db: AsyncSession, token: str, required_scope: List[Scope]):
 
         if not token:
             raise AuthorizationException(message="Unauthorized")
@@ -43,7 +45,7 @@ class AuthService:
         if not has_scope:
             raise AuthenticationException(message="Forbidden")
 
-        if not UserRepository().read(query=UserEmailQuery(email=token_payload.email)):
+        if not UserRepository().read(db, query=UserEmailQuery(email=token_payload.email)):
             raise AuthorizationServiceException(message="No user with given token")
 
     def parse_token(self, token: str) -> TokenPayload:

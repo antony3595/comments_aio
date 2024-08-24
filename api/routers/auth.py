@@ -1,11 +1,13 @@
 import logging
 
 from fastapi import APIRouter, Depends, Body
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies.auth import ApiKeyAuth
+from db.connections.postgres import get_async_session
 from repository.user import UserRepository
 from schema.api.auth import UserTokenResponse, UserTokenRequest, BaseTokenPayload
-from schema.db.user import UserSchema
+from schema.db.user import UserBaseSchema
 from schema.query.user import UserEmailQuery
 from services.auth.authorizaton import AuthService
 
@@ -15,12 +17,13 @@ auth_router = APIRouter(prefix="/auth")
 
 @auth_router.post("/", response_model=UserTokenResponse, dependencies=[Depends(ApiKeyAuth)])
 async def auth(data: UserTokenRequest = Body(),
+               db: AsyncSession = Depends(get_async_session),
                user_repository: UserRepository = Depends(UserRepository)) -> UserTokenResponse:
     db_query = UserEmailQuery(email=data.email)
-    user = user_repository.read(db_query)
+    user = await user_repository.read(db, db_query)
 
     if not user:
-        user = user_repository.create(query=UserSchema(
+        user = await user_repository.create(db, query=UserBaseSchema(
             email=data.email,
             full_name=data.full_name,
         ))

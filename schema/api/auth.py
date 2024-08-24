@@ -22,7 +22,7 @@ class UserTokenRequest(BaseModel):
 
 
 class BaseTokenPayload(BaseModel):
-    id: str = UserFields.id
+    id: int = UserFields.id
     full_name: str = UserFields.full_name
     email: EmailStr = UserFields.email
     scope: List[Scope] = Field(description="Token access scope")
