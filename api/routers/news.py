@@ -20,4 +20,4 @@ async def get_news(
         user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
         db: AsyncSession = Depends(get_async_session)) -> list[NewsSchema]:
     logger.info(f"User {user.email} got news response")
-    return NewsRepository().read_all(db)
+    return await NewsRepository().read_all(db)
