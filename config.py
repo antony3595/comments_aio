@@ -16,13 +16,15 @@ logging.basicConfig(
 
 
 class Settings(BaseSettings):
+    DEBUG: bool = True
     BLOGS_API_URL: str = "https://jsonplaceholder.typicode.com"
     CONSUMERS_COUNT: int = 10
     TCP_SERVER_HOST: str = "0.0.0.0"
     TCP_SERVER_PORT: str = "8888"
-    TOKEN_MAX_TTL: int = 1800
+    TOKEN_MAX_TTL: int = 3600
     API_KEY: SecretStr = "123"
     SECRET_KEY: SecretStr = "123"
+    DB_CONNECTION_STRING: SecretStr = "postgresql+asyncpg://user:password@localhost:5435/comments_aio_db"
 
 
 settings = Settings()

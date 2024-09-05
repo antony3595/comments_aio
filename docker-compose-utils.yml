@@ -1,0 +1,21 @@
+version: '3.3'
+
+services:
+  comments_aio_pg_12:
+    restart: always
+    image: postgres:12.17
+    container_name: comments_aio_pg_12
+    ports:
+      - 5435:5432
+    environment:
+      - TZ=Asia/Bishkek
+      - PGTZ=Asia/Bishkek
+      - POSTGRES_DB=comments_aio_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    networks:
+      comments_aio_network:
+
+
+networks:
+  comments_aio_network:

@@ -4,3 +4,6 @@ fastapi[all]
 requests
 pydantic-settings==2.4.0
 uvicorn[standard]
+SQLAlchemy==2.0.32
+alembic
+asyncpg
