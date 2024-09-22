@@ -7,16 +7,16 @@ from db.models.base import BaseModel
 
 
 class NewsTypeEnum(enum.Enum):
-    WORLD_EVENTS = "Мировые события"
-    POLITICS = "Политика"
-    ECONOMY = "Экономика"
-    SCIENCE_AND_TECHNOLOGY = "Наука и технологии"
-    HEALTHCARE = "Здравоохранение"
-    ENVIRONMENT = "Экология"
-    CULTURE_AND_ARTS = "Культура и искусство"
-    SPORTS = "Спорт"
-    SOCIETY = "Общество"
-    ENTERTAINMENT = "Развлечения"
+    WORLD_EVENTS = "WORLD_EVENTS"
+    POLITICS = "POLITICS"
+    ECONOMY = "ECONOMY"
+    SCIENCE_AND_TECHNOLOGY = "SCIENCE_AND_TECHNOLOGY"
+    HEALTHCARE = "HEALTHCARE"
+    ENVIRONMENT = "ENVIRONMENT"
+    CULTURE_AND_ARTS = "CULTURE_AND_ARTS"
+    SPORTS = "SPORTS"
+    SOCIETY = "SOCIETY"
+    ENTERTAINMENT = "ENTERTAINMENT"
 
 
 class News(BaseModel):
