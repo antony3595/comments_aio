@@ -39,3 +39,8 @@ class NewsCategorySubscribeValues(BaseModel):
 class UserCategorySubscriptionSchema(BaseModel):
     category: NewsTypeEnum = Field(description="Category")
     user_id: int = UserFields.id
+
+
+class UserSubscriptionNewsQuery(BaseModel):
+    categories: List[NewsTypeEnum] = Field(description="Categories enum list")
+    user_id: int = UserFields.id

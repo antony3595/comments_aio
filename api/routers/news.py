@@ -8,8 +8,9 @@ from api.dependencies.auth import JWTTokenScopeAuth
 from db.connections.postgres import get_async_session
 from repository.enums.scope import Scope
 from repository.news import NewsRepository
+from repository.user import UserRepository
 from schema.db.news import NewsSchema, NewsWithCategoriesSchema, NewsCategorySubscribeRequestSchema, NewsCategorySubscribeValues, \
-    UserCategorySubscriptionSchema
+    UserCategorySubscriptionSchema, UserSubscriptionNewsQuery
 from schema.db.user import UserSchema
 
 logger = logging.getLogger(__name__)
@@ -41,3 +42,14 @@ async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTToke
     result = await NewsRepository().subscribe_to_category(db, values)
     await db.commit()
     return result
+
+
+@news_router.get("/subscriptions", response_model=List[NewsSchema])
+async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
+                                     db: AsyncSession = Depends(get_async_session),
+                                     ) -> List[NewsSchema]:
+    subscriptions = await UserRepository().get_subscriptions(db, user_id=user.id)
+    categories = [subscription.category for subscription in subscriptions]
+
+    news = await NewsRepository().get_user_subscription_news(db, query=UserSubscriptionNewsQuery(categories=categories, user_id=user.id))
+    return news

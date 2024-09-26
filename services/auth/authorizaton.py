@@ -11,7 +11,7 @@ import config
 from repository.enums.scope import Scope
 from repository.user import UserRepository
 from schema.api.auth import TokenPayload, BaseTokenPayload
-from schema.query.user import UserEmailQuery
+from schema.query.user import UserReadQuery
 from services.auth.exceptions import AuthorizationServiceException, AuthorizationException, AuthenticationException
 
 
@@ -45,7 +45,7 @@ class AuthService:
         if not has_scope:
             raise AuthenticationException(message="Forbidden")
 
-        if not UserRepository().read(db, query=UserEmailQuery(email=token_payload.email)):
+        if not UserRepository().read(db, query=UserReadQuery(email=token_payload.email)):
             raise AuthorizationServiceException(message="No user with given token")
 
     def parse_token(self, token: str) -> TokenPayload:

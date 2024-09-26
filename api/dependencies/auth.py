@@ -9,7 +9,7 @@ from db.connections.postgres import get_async_session
 from repository.enums.scope import Scope
 from repository.user import UserRepository, get_user_repository
 from schema.db.user import UserSchema
-from schema.query.user import UserEmailQuery
+from schema.query.user import UserReadQuery
 from services.auth.authorizaton import AuthService, get_auth_service
 from services.auth.exceptions import AuthorizationException, AuthenticationException
 
@@ -27,7 +27,7 @@ async def jwt_token_auth(token: str = Security(APIKeyHeader(name="Authorization"
     auth_service.validate_token(token, [])
     token_payload = auth_service.parse_token(token)
 
-    user = user_repository.read(query=UserEmailQuery(email=token_payload.email))
+    user = user_repository.read(query=UserReadQuery(email=token_payload.email))
     if not user:
         raise HTTPException(detail="No user with given token", status_code=403)
 
@@ -53,7 +53,7 @@ class JWTTokenScopeAuth:
         except AuthenticationException as e:
             raise HTTPException(detail=e.message, status_code=403)
 
-        user = await user_repository.read(db, query=UserEmailQuery(email=token_payload.email))
+        user = await user_repository.read(db, query=UserReadQuery(email=token_payload.email))
         if not user:
             raise HTTPException(detail="No user with given token", status_code=403)
 

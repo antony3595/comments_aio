@@ -1,11 +1,12 @@
 from typing import List
 
-from sqlalchemy import select, insert, delete
+from sqlalchemy import select, insert, delete, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from db.models.news import News, NewsCategory, UserCategorySubscription
-from schema.db.news import NewsSchema, NewsWithCategoriesSchema, NewsCategorySubscribeValues, UserCategorySubscriptionSchema
+from schema.db.news import NewsSchema, NewsWithCategoriesSchema, NewsCategorySubscribeValues, UserCategorySubscriptionSchema, \
+    UserSubscriptionNewsQuery
 
 
 class NewsRepository:
@@ -27,4 +28,10 @@ class NewsRepository:
 
         subscriptions = await db.execute(insert(UserCategorySubscription).values(dict_values).returning(UserCategorySubscription))
         result = [UserCategorySubscriptionSchema.model_validate(s, from_attributes=True) for s in subscriptions.scalars().all()]
+        return result
+
+    async def get_user_subscription_news(self, db: AsyncSession, query: UserSubscriptionNewsQuery) -> List[NewsSchema]:
+        stmt = await db.execute(select(News).join(NewsCategory).where(NewsCategory.category.in_(query.categories)))
+        news = stmt.scalars().unique()
+        result = [NewsSchema.model_validate(news_item, from_attributes=True) for news_item in news]
         return result
