@@ -9,6 +9,7 @@ from db.connections.postgres import get_async_session
 from repository.enums.scope import Scope
 from repository.news import NewsRepository
 from repository.user import UserRepository
+from schema.db.base import PaginationSchema
 from schema.db.news import NewsSchema, NewsWithCategoriesSchema, NewsCategorySubscribeRequestSchema, NewsCategorySubscribeValues, \
     UserCategorySubscriptionSchema, UserSubscriptionNewsQuery
 from schema.db.user import UserSchema
@@ -45,11 +46,16 @@ async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTToke
 
 
 @news_router.get("/subscriptions", response_model=List[NewsSchema])
-async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
+async def get_user_subscription_news(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
+                                     pagination: PaginationSchema = Depends(),
                                      db: AsyncSession = Depends(get_async_session),
                                      ) -> List[NewsSchema]:
     subscriptions = await UserRepository().get_subscriptions(db, user_id=user.id)
     categories = [subscription.category for subscription in subscriptions]
 
-    news = await NewsRepository().get_user_subscription_news(db, query=UserSubscriptionNewsQuery(categories=categories, user_id=user.id))
+    news = await (NewsRepository().get_user_subscription_news(db,
+                                                              query=UserSubscriptionNewsQuery(
+                                                                  categories=categories,
+                                                                  user_id=user.id),
+                                                              pagination=pagination))
     return news
