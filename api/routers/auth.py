@@ -8,7 +8,7 @@ from db.connections.postgres import get_async_session
 from repository.user import UserRepository
 from schema.api.auth import UserTokenResponse, UserTokenRequest, BaseTokenPayload
 from schema.db.user import UserBaseSchema
-from schema.query.user import UserEmailQuery
+from schema.query.user import UserReadQuery
 from services.auth.authorizaton import AuthService
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ auth_router = APIRouter(prefix="/auth")
 async def auth(data: UserTokenRequest = Body(),
                db: AsyncSession = Depends(get_async_session),
                user_repository: UserRepository = Depends(UserRepository)) -> UserTokenResponse:
-    db_query = UserEmailQuery(email=data.email)
+    db_query = UserReadQuery(email=data.email)
     user = await user_repository.read(db, db_query)
 
     if not user:
