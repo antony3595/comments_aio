@@ -1,6 +1,7 @@
 import enum
 
-from sqlalchemy import Column, VARCHAR, ForeignKey, UniqueConstraint, Enum
+from sqlalchemy import Column, VARCHAR, ForeignKey, UniqueConstraint, Enum, Boolean
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from db.models.base import BaseModel
@@ -41,3 +42,11 @@ class UserCategorySubscription(BaseModel):
     user = relationship("AuthUser", backref="categories")
 
     __table_args__ = (UniqueConstraint(category, user_id),)
+
+
+class RawNews(BaseModel):
+    __tablename__ = 'raw_news'
+    data = Column(JSONB, nullable=False)
+    processed = Column(Boolean, nullable=False, default=False)
+    service_account_id = Column(ForeignKey("service_accounts.id", ondelete="CASCADE"), nullable=False)
+    service_account = relationship("ServiceAccount", back_populates="raw_news")
