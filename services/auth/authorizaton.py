@@ -11,8 +11,9 @@ import config
 from repository.enums.scope import Scope
 from repository.user import UserRepository
 from schema.api.auth import TokenPayload, BaseTokenPayload
+from schema.db.user import UserSchema
 from schema.query.user import UserReadQuery
-from services.auth.exceptions import AuthorizationServiceException, AuthorizationException, AuthenticationException
+from services.auth.exceptions import AuthorizationException, AuthenticationException
 
 
 class AuthService:
@@ -27,7 +28,7 @@ class AuthService:
         token = unsigned_token + "." + signature
         return token
 
-    def validate_token(self, db: AsyncSession, token: str, required_scope: List[Scope]):
+    async def validate_token(self, db: AsyncSession, token: str, required_scope: List[Scope] = None) -> UserSchema:
 
         if not token:
             raise AuthorizationException(message="Unauthorized")
@@ -41,12 +42,13 @@ class AuthService:
         if token_payload.exp < now:
             raise AuthorizationException(message="Token expired")
 
-        has_scope = any([scope_item in token_payload.scope for scope_item in required_scope])
+        has_scope = any([scope_item in token_payload.scope for scope_item in required_scope]) if required_scope else True
         if not has_scope:
             raise AuthenticationException(message="Forbidden")
 
-        if not UserRepository().read(db, query=UserReadQuery(email=token_payload.email)):
-            raise AuthorizationServiceException(message="No user with given token")
+        if user := await UserRepository().read(db, query=UserReadQuery(email=token_payload.email)):
+            return user
+        raise AuthorizationException(message="No user with given token")
 
     def parse_token(self, token: str) -> TokenPayload:
         payload_segment = token.split(".")[1]

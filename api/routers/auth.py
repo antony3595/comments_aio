@@ -14,7 +14,6 @@ from services.auth.authorizaton import AuthService
 logger = logging.getLogger(__name__)
 auth_router = APIRouter(prefix="/auth")
 
-
 @auth_router.post("/", response_model=UserTokenResponse, dependencies=[Depends(ApiKeyAuth)])
 async def auth(data: UserTokenRequest = Body(),
                db: AsyncSession = Depends(get_async_session),
