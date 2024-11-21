@@ -15,7 +15,7 @@ class UserRepository:
     async def read(self, db: AsyncSession, query: UserReadQuery) -> UserSchema | None:
         stmt = await db.execute(select(AuthUser).where(or_(AuthUser.email == query.email, AuthUser.id == query.id)))
         user = stmt.scalars().one_or_none()
-        return UserSchema.model_validate(user, from_attributes=True)
+        return UserSchema.model_validate(user, from_attributes=True) if user else None
 
     async def get_subscriptions(self, db: AsyncSession, user_id: int) -> List[UserCategorySubscriptionSchema]:
         stmt = await db.execute(select(UserCategorySubscription).where(UserCategorySubscription.user_id == user_id))

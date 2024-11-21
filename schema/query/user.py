@@ -9,7 +9,7 @@ class UserReadQuery(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def ensure_score_greater_equal_threshold(cls, values):
+    def validate_required_fields(cls, values):
         if not (values.get("id") or values.get("email")):
-            raise ValidationError(f"'id' or 'email required'")
+            raise ValidationError(f"'id' or 'email' required'")
         return values
