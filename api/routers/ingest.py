@@ -8,7 +8,7 @@ from pydantic import Json
 from sqlalchemy.ext.asyncio import AsyncSession
 from tasks.raw_news import process_raw_news
 from api.dependencies.auth import ServiceAccountAuth
-from db.connections.postgres import get_async_session
+from db.connections.postgres import get_db
 from schema.db.service_account import ServiceAccountSchema
 from services.raw_news.raw_news import RawNewsService
 
@@ -19,7 +19,7 @@ ingest_router = APIRouter(prefix="/ingest", tags=["ingest"])
 @ingest_router.post("/news", response_model=List[str])
 async def ingest_raw_news(service_account: Annotated[ServiceAccountSchema, Depends(ServiceAccountAuth())],
                           body: List[Json[Any]] = Body(example=['{"foo": "bar"}']),
-                          db: AsyncSession = Depends(get_async_session),
+                          db: AsyncSession = Depends(get_db),
                           ):
     logger.info(f"Ingesting raw news data {body}")
 

@@ -9,7 +9,7 @@ from config import settings
 
 __all__ = ["process_raw_news"]
 
-from db.connections.postgres import async_session, get_async_session_celery
+from db.connections.postgres import get_async_session
 from repository.news import get_news_repository
 
 from repository.raw_news import get_raw_news_repository
@@ -34,12 +34,12 @@ def process_raw_news(raw_news_id: int) -> None:
 
 
 async def create_raw_news(raw_news_id: int):
-    async with get_async_session_celery() as db:
+    async with get_async_session() as db:
         raw_news_repository = get_raw_news_repository()
         news_repository = get_news_repository()
         raw_news = await raw_news_repository.read(db, raw_news_id)
 
-        try:  # TODO обернуть в try except и все равно отметить как processed
+        try:
             news_values = CreateNewsSchema.model_validate(raw_news.data)
             news = await news_repository.create(db, news_values)
             logger.info(f"raw news created successfully: news: {news.model_dump()}, raw={raw_news.model_dump()}")

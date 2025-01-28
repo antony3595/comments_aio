@@ -9,7 +9,7 @@ engine = create_async_engine(settings.DB_CONNECTION_STRING.get_secret_value(), e
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def get_async_session() -> AsyncSession:
+async def get_db() -> AsyncSession:
     session = async_session()
     try:
         yield session
@@ -21,9 +21,8 @@ async def get_async_session() -> AsyncSession:
         await session.close()
 
 
-# TODO rename
 @asynccontextmanager
-async def get_async_session_celery() -> AsyncSession:
+async def get_async_session() -> AsyncSession:
     session = async_session()
     try:
         yield session

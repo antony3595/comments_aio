@@ -6,7 +6,7 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import config
-from db.connections.postgres import get_async_session
+from db.connections.postgres import get_db
 from repository.enums.scope import Scope
 from repository.service_account import ServiceAccountRepository
 from schema.db.service_account import ServiceAccountSchema
@@ -26,7 +26,7 @@ class ApiKeyAuth:
 
 async def jwt_token_auth(token: str = Security(token_header),
                          auth_service: AuthService = Depends(get_auth_service),
-                         db: AsyncSession = Depends(get_async_session)
+                         db: AsyncSession = Depends(get_db)
                          ) -> UserSchema:
     try:
         user = await auth_service.validate_token(db, token, [])
@@ -43,7 +43,7 @@ class JWTTokenScopeAuth:
         self.required_scope = required_scope
 
     async def __call__(self, token: str = Security(token_header),
-                       db: AsyncSession = Depends(get_async_session),
+                       db: AsyncSession = Depends(get_db),
                        auth_service: AuthService = Depends(get_auth_service),
                        ) -> UserSchema:
 
@@ -60,7 +60,7 @@ class JWTTokenScopeAuth:
 
 class ServiceAccountAuth:
     async def __call__(self, token: str = Security(token_header),
-                       db: AsyncSession = Depends(get_async_session),
+                       db: AsyncSession = Depends(get_db),
                        ) -> ServiceAccountSchema:
         service_account = await ServiceAccountRepository().read_by_token(db, token)
 

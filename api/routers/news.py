@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies.auth import JWTTokenScopeAuth
-from db.connections.postgres import get_async_session
+from db.connections.postgres import get_db
 from repository.enums.scope import Scope
 from repository.news import NewsRepository
 from repository.user import UserRepository
@@ -21,7 +21,7 @@ news_router = APIRouter(prefix="/news")
 @news_router.get("/", response_model=list[NewsSchema])
 async def get_news(
         user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
-        db: AsyncSession = Depends(get_async_session)) -> list[NewsSchema]:
+        db: AsyncSession = Depends(get_db)) -> list[NewsSchema]:
     logger.info(f"User {user.email} got news response")
     return await NewsRepository().read_all(db)
 
@@ -29,14 +29,14 @@ async def get_news(
 @news_router.get("/extended", response_model=list[NewsWithCategoriesSchema])
 async def get_news_full(
         user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
-        db: AsyncSession = Depends(get_async_session)) -> list[NewsWithCategoriesSchema]:
+        db: AsyncSession = Depends(get_db)) -> list[NewsWithCategoriesSchema]:
     logger.info(f"User {user.email} got news response")
     return await NewsRepository().read_all_extended(db)
 
 
 @news_router.post("/subscribe", response_model=List[UserCategorySubscriptionSchema])
 async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
-                                     db: AsyncSession = Depends(get_async_session),
+                                     db: AsyncSession = Depends(get_db),
                                      body: NewsCategorySubscribeRequestSchema = Body()
                                      ) -> List[UserCategorySubscriptionSchema]:
     values = NewsCategorySubscribeValues(user_id=user.id, categories=body.categories)
@@ -47,7 +47,7 @@ async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTToke
 @news_router.get("/subscriptions", response_model=List[NewsSchema])
 async def get_user_subscription_news(user: Annotated[UserSchema, Depends(JWTTokenScopeAuth(required_scope=[Scope.NEWS]))],
                                      pagination: PaginationSchema = Depends(),
-                                     db: AsyncSession = Depends(get_async_session),
+                                     db: AsyncSession = Depends(get_db),
                                      ) -> List[NewsSchema]:
     subscriptions = await UserRepository().get_subscriptions(db, user_id=user.id)
     categories = [subscription.category for subscription in subscriptions]
