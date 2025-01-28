@@ -26,7 +26,6 @@ class UserRepository:
     async def create(self, db: AsyncSession, query: UserBaseSchema) -> UserSchema | None:
         stmt = await db.execute(insert(AuthUser).returning(AuthUser), query.model_dump())
         user = stmt.scalars().one_or_none()
-        await db.commit()
         return UserSchema.model_validate(user, from_attributes=True) if user else None
 
 

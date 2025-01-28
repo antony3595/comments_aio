@@ -41,7 +41,6 @@ async def subscribe_user_to_category(user: Annotated[UserSchema, Depends(JWTToke
                                      ) -> List[UserCategorySubscriptionSchema]:
     values = NewsCategorySubscribeValues(user_id=user.id, categories=body.categories)
     result = await NewsRepository().subscribe_to_category(db, values)
-    await db.commit()
     return result
 
 

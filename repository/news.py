@@ -1,16 +1,22 @@
 from typing import List
 
-from sqlalchemy import select, insert, delete, and_
+from sqlalchemy import select, insert, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from db.models.news import News, NewsCategory, UserCategorySubscription
 from schema.db.base import PaginationSchema
 from schema.db.news import NewsSchema, NewsWithCategoriesSchema, NewsCategorySubscribeValues, UserCategorySubscriptionSchema, \
-    UserSubscriptionNewsQuery
+    UserSubscriptionNewsQuery, CreateNewsSchema
 
 
 class NewsRepository:
+    async def create(self, db: AsyncSession, values: CreateNewsSchema, **kwargs) -> NewsSchema:
+        stmt = insert(News).values(values.model_dump()).returning(News)
+        result = await db.execute(stmt)
+        news = result.scalars().one_or_none()
+        return NewsSchema.model_validate(news, from_attributes=True)
+
     async def read_all(self, db: AsyncSession, **kwargs) -> List[NewsSchema]:
         stmt = await db.execute(select(News))
         news = stmt.scalars().all()
@@ -31,12 +37,17 @@ class NewsRepository:
         result = [UserCategorySubscriptionSchema.model_validate(s, from_attributes=True) for s in subscriptions.scalars().all()]
         return result
 
-    async def get_user_subscription_news(self, db: AsyncSession, query: UserSubscriptionNewsQuery, pagination: PaginationSchema = None) -> List[NewsSchema]:
+    async def get_user_subscription_news(self, db: AsyncSession, query: UserSubscriptionNewsQuery, pagination: PaginationSchema = None) -> \
+            List[NewsSchema]:
         stmt = select(News).join(NewsCategory).where(NewsCategory.category.in_(query.categories)).order_by(News.created_at.desc())
         if pagination:
-            stmt = stmt.limit(pagination.size).offset((pagination.page -1) * pagination.size)
+            stmt = stmt.limit(pagination.size).offset((pagination.page - 1) * pagination.size)
 
         result = await db.execute(stmt)
         news = result.scalars().unique()
         result = [NewsSchema.model_validate(news_item, from_attributes=True) for news_item in news]
         return result
+
+
+def get_news_repository() -> NewsRepository:
+    return NewsRepository()

@@ -17,6 +17,10 @@ class NewsCategorySchema(BaseModel):
     category: NewsTypeEnum = Field(description="Category")
 
 
+class CreateNewsSchema(BaseModel):
+    title: str = NewsFields.title
+
+
 class NewsSchema(BaseModel):
     id: int = NewsFields.id
     title: str = NewsFields.title

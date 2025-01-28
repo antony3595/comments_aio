@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -11,5 +13,23 @@ async def get_async_session() -> AsyncSession:
     session = async_session()
     try:
         yield session
+        await session.commit()
+    except Exception as e:
+        await session.rollback()
+        raise e
+    finally:
+        await session.close()
+
+
+# TODO rename
+@asynccontextmanager
+async def get_async_session_celery() -> AsyncSession:
+    session = async_session()
+    try:
+        yield session
+        await session.commit()
+    except Exception as e:
+        await session.rollback()
+        raise e
     finally:
         await session.close()
