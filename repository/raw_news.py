@@ -1,8 +1,11 @@
+from typing import List
+
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models.news import RawNews
-from schema.db.raw_news import CreateRawNewsSchema, RawNewsSchema, UpdateRawNewsSchema
+from schema.db.base import PaginationSchema
+from schema.db.raw_news import CreateRawNewsSchema, RawNewsSchema, UpdateRawNewsSchema, RawNewsFiltersSchema
 
 
 class RawNewsRepository:
@@ -17,6 +20,19 @@ class RawNewsRepository:
         result = await db.execute(stmt)
         result = result.scalars().one()
         return RawNewsSchema.model_validate(result, from_attributes=True) if result else None
+
+    async def read_all(self, db: AsyncSession,
+                       filters: RawNewsFiltersSchema = None,
+                       pagination: PaginationSchema = None) -> List[RawNewsSchema]:
+
+        stmt = select(RawNews)
+        if filters:
+            stmt = stmt.filter_by(**filters.to_orm_filters())
+        if pagination:
+            stmt = stmt.limit(pagination.size).offset((pagination.page - 1) * pagination.size)
+        db_result = await db.execute(stmt)
+        result = db_result.scalars().all()
+        return [RawNewsSchema.model_validate(item, from_attributes=True) for item in result] if result else []
 
     async def update(self, db: AsyncSession, raw_news_id: int, values: UpdateRawNewsSchema) -> RawNewsSchema:
         stmt = update(RawNews).where(RawNews.id == raw_news_id).values(values.model_dump(exclude_unset=True)).returning(RawNews)
