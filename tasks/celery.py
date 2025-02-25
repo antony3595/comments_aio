@@ -11,14 +11,20 @@ app = Celery(__name__,
 
 app.conf.task_queues = [
     Queue("ingest_queue"),
-    Queue("push_queue")
+    Queue("push_queue"),
+    Queue("expired_service_accounts_queue")
 ]
 
 
 app.conf.beat_schedule = {
     "process_stuck_raw_news": {
         "task": "tasks.stuck_raw_news.process_stuck_raw_news_task",
-        "schedule": crontab(minute="*/1"),
+        "schedule": crontab(minute="*/5"),
+    },
+
+    "remove_expired_service_accounts": {
+        "task": "tasks.remove_expired_service_accounts.remove_expired_service_accounts_task",
+        "schedule": crontab(minute="0,15,30,45"),
     }
 }
 
