@@ -7,3 +7,4 @@ uvicorn[standard]
 SQLAlchemy==2.0.32
 alembic
 asyncpg
+black==25.1.0
