@@ -17,16 +17,17 @@ class NewsRepository:
         news = result.scalars().one_or_none()
         return NewsSchema.model_validate(news, from_attributes=True)
 
-    async def read_all(self, db: AsyncSession, **kwargs) -> List[NewsSchema]:
+    async def read_all(self, db: AsyncSession) -> List[NewsSchema]:
         stmt = await db.execute(select(News))
         news = stmt.scalars().all()
 
         return [NewsSchema.model_validate(news_item, from_attributes=True) for news_item in news]
 
-    async def read_all_extended(self, db: AsyncSession, **kwargs) -> List[NewsWithCategoriesSchema]:
-        stmt = await db.execute(select(News).options(joinedload(News.categories).load_only(NewsCategory.category)))
-        news = stmt.scalars().unique()
-
+    async def read_all_extended(self, db: AsyncSession) -> List[NewsWithCategoriesSchema]:
+        # TODO сделать categories листом
+        stmt = select(News).options(joinedload(News.categories, innerjoin=True).load_only(NewsCategory.category))
+        result = await db.execute(stmt)
+        news = result.scalars().unique()
         return [NewsWithCategoriesSchema.model_validate(news_item, from_attributes=True) for news_item in news]
 
     async def subscribe_to_category(self, db: AsyncSession, values: NewsCategorySubscribeValues) -> List[UserCategorySubscriptionSchema]:
@@ -38,14 +39,22 @@ class NewsRepository:
         return result
 
     async def get_user_subscription_news(self, db: AsyncSession, query: UserSubscriptionNewsQuery, pagination: PaginationSchema = None) -> \
-            List[NewsSchema]:
-        stmt = select(News).join(NewsCategory).where(NewsCategory.category.in_(query.categories)).order_by(News.created_at.desc())
+            List[NewsWithCategoriesSchema]:
+        # TODO узнать как оптимальнее, через join таблицы users_categories_subscriptions или так
+        categories = [c.value for c in query.categories]
+        stmt = (select(News)
+                .join(NewsCategory)
+                .options(joinedload(News.categories)
+                         .load_only(NewsCategory.category))
+                .where(NewsCategory.category.in_(categories))
+                .order_by(News.created_at.desc()))
+        # TODO сделать общую пагинацию, вместе с количеством элементов в Response
         if pagination:
             stmt = stmt.limit(pagination.size).offset((pagination.page - 1) * pagination.size)
 
         result = await db.execute(stmt)
         news = result.scalars().unique()
-        result = [NewsSchema.model_validate(news_item, from_attributes=True) for news_item in news]
+        result = [NewsWithCategoriesSchema.model_validate(news_item, from_attributes=True) for news_item in news]
         return result
 
 

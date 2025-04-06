@@ -28,6 +28,7 @@ def process_raw_news(raw_news_id: int) -> int:
 
 
 async def create_news_from_raw_news(raw_news_id: int) -> int:
+    # TODO use async_session()
     async with get_null_pool_async_session() as db:
         raw_news_repository = get_raw_news_repository()
         news_repository = get_news_repository()
