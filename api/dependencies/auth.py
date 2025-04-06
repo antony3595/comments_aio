@@ -59,11 +59,13 @@ class JWTTokenScopeAuth:
 
 
 class ServiceAccountAuth:
-    async def __call__(self, token: str = Security(token_header),
+    async def __call__(self,
+                       token: str = Security(token_header),
                        db: AsyncSession = Depends(get_db),
                        ) -> ServiceAccountSchema:
-        service_account = await ServiceAccountRepository().read_by_token(db, token)
-
+        async with db.begin():
+            service_account = await ServiceAccountRepository().read_by_token(db, token)
+            await db.commit()
         if service_account and service_account.token_valid_date > datetime.now():
             return service_account
 
