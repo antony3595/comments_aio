@@ -1,6 +1,13 @@
 import enum
 
-from sqlalchemy import Column, VARCHAR, ForeignKey, UniqueConstraint, Enum, Boolean
+from sqlalchemy import (
+    Column,
+    VARCHAR,
+    ForeignKey,
+    UniqueConstraint,
+    Enum,
+    Boolean,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -21,13 +28,13 @@ class NewsTypeEnum(enum.Enum):
 
 
 class News(BaseModel):
-    __tablename__ = 'news'
+    __tablename__ = "news"
     title = Column(VARCHAR(255), nullable=False)
     categories = relationship("NewsCategory", back_populates="news")
 
 
 class NewsCategory(BaseModel):
-    __tablename__ = 'news_categories'
+    __tablename__ = "news_categories"
     category = Column(Enum(NewsTypeEnum), nullable=False)
     news_id = Column(ForeignKey("news.id"), nullable=False)
     news = relationship("News", back_populates="categories")
@@ -36,17 +43,21 @@ class NewsCategory(BaseModel):
 
 
 class UserCategorySubscription(BaseModel):
-    __tablename__ = 'users_categories_subscriptions'
+    __tablename__ = "users_categories_subscriptions"
     category = Column(Enum(NewsTypeEnum), nullable=False)
-    user_id = Column(ForeignKey("auth_users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        ForeignKey("auth_users.id", ondelete="CASCADE"), nullable=False
+    )
     user = relationship("AuthUser", backref="categories")
 
     __table_args__ = (UniqueConstraint(category, user_id),)
 
 
 class RawNews(BaseModel):
-    __tablename__ = 'raw_news'
+    __tablename__ = "raw_news"
     data = Column(JSONB, nullable=False)
     processed = Column(Boolean, nullable=False, default=False)
-    service_account_id = Column(ForeignKey("service_accounts.id", ondelete="CASCADE"), nullable=False)
+    service_account_id = Column(
+        ForeignKey("service_accounts.id", ondelete="CASCADE"), nullable=False
+    )
     service_account = relationship("ServiceAccount", back_populates="raw_news")

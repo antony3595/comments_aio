@@ -17,7 +17,11 @@ class UserTokenRequest(BaseModel):
     @field_validator("seconds")
     def is_token_ttl_valid(cls, value: int):
         if value > config.settings.TOKEN_MAX_TTL:
-            raise RequestValidationError("TTL cant be greater than {}".format(config.settings.TOKEN_MAX_TTL))
+            raise RequestValidationError(
+                "TTL cant be greater than {}".format(
+                    config.settings.TOKEN_MAX_TTL
+                )
+            )
         return value
 
 

@@ -25,19 +25,28 @@ def generate_fake_ingest_body():
     categories = [e.value for e in NewsTypeEnum]
 
     for i in range(1, 1000):
-        body.append('{{"title": "ingested news {}","categories": ["{}"]}}'.format(i, random.choice(categories)))
+        body.append(
+            '{{"title": "ingested news {}","categories": ["{}"]}}'.format(
+                i, random.choice(categories)
+            )
+        )
     return body
 
 
 @ingest_router.post("/news")
-async def ingest_raw_news(service_account: Annotated[ServiceAccountSchema, Depends(ServiceAccountAuth())],
-                          body: List[Json[Any]] = Body(example=generate_fake_ingest_body()),
-                          db: AsyncSession = Depends(get_db)
-                          ):
+async def ingest_raw_news(
+    service_account: Annotated[
+        ServiceAccountSchema, Depends(ServiceAccountAuth())
+    ],
+    body: List[Json[Any]] = Body(example=generate_fake_ingest_body()),
+    db: AsyncSession = Depends(get_db),
+):
     logger.info(f"Ingesting raw news data {body}")
 
     raw_news_service = RawNewsService()
-    results = await raw_news_service.create_raw_news_bulk(db=db, service_account_id=service_account.id, raw_news_data_values=body)
+    results = await raw_news_service.create_raw_news_bulk(
+        db=db, service_account_id=service_account.id, raw_news_data_values=body
+    )
 
     for raw_news in results:
         process_raw_news.delay(raw_news.id)
