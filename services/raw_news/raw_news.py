@@ -29,8 +29,8 @@ class RawNewsService:
     async def read_all(
         self,
         db: AsyncSession,
-        filters: RawNewsFiltersSchema = None,
-        pagination: PaginationSchema = None,
+        filters: RawNewsFiltersSchema | None = None,
+        pagination: PaginationSchema | None = None,
     ) -> List[RawNewsSchema]:
         async with db.begin():
             res = await get_raw_news_repository().read_all(
@@ -40,9 +40,7 @@ class RawNewsService:
             return res
 
     @staticmethod
-    async def get_by_id(
-        db: AsyncSession, raw_news_id: int
-    ) -> RawNewsSchema | None:
+    async def get_by_id(db: AsyncSession, raw_news_id: int) -> RawNewsSchema:
         async with db.begin():
             raw_news = await RawNewsRepository().read(db, raw_news_id)
             await db.commit()

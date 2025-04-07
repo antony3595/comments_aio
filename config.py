@@ -22,12 +22,12 @@ class Settings(BaseSettings):
     TCP_SERVER_HOST: str = "0.0.0.0"
     TCP_SERVER_PORT: str = "8888"
     TOKEN_MAX_TTL: int = 3600
-    API_KEY: SecretStr = "123"
-    SECRET_KEY: SecretStr = "123"
-    DB_CONNECTION_STRING: SecretStr = (
+    API_KEY: SecretStr = SecretStr("123")
+    SECRET_KEY: SecretStr = SecretStr("123")
+    DB_CONNECTION_STRING: SecretStr = SecretStr(
         "postgresql+asyncpg://user:password@localhost:5435/comments_aio_db"
     )
-    REDIS_URL: SecretStr = "redis://localhost:6379"
+    REDIS_URL: SecretStr = SecretStr("redis://localhost:6379")
     TIMEZONE: str = "Asia/Bishkek"
 
 

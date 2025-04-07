@@ -48,6 +48,7 @@ async def create_news_from_raw_news(raw_news_id: int) -> int:
             logging.info(
                 f"raw news processed with errors: {e.errors()}, raw={raw_news.model_dump()}"
             )
+            raise e
         finally:
             await raw_news_service.update(
                 db, raw_news_id, UpdateRawNewsSchema(processed=True)

@@ -36,7 +36,7 @@ class NewsRepository:
 
     async def read_extended_by_id(
         self, db: AsyncSession, news_id: int
-    ) -> NewsWithCategoriesSchema | None:
+    ) -> NewsWithCategoriesSchema:
         # TODO сделать categories листом
         stmt = (
             select(News)
@@ -49,11 +49,9 @@ class NewsRepository:
         )
 
         result = await db.execute(stmt)
-        news = result.scalars().unique().one_or_none()
-        return (
-            NewsWithCategoriesSchema.model_validate(news, from_attributes=True)
-            if news
-            else None
+        news = result.scalars().unique().one()
+        return NewsWithCategoriesSchema.model_validate(
+            news, from_attributes=True
         )
 
     async def read_all_extended(
@@ -104,7 +102,7 @@ class NewsRepository:
         self,
         db: AsyncSession,
         query: UserSubscriptionNewsQuery,
-        pagination: PaginationSchema = None,
+        pagination: PaginationSchema | None = None,
     ) -> List[NewsWithCategoriesSchema]:
         # TODO узнать как оптимальнее, через join таблицы users_categories_subscriptions или так
         categories = [c.value for c in query.categories]
@@ -123,8 +121,8 @@ class NewsRepository:
                 (pagination.page - 1) * pagination.size
             )
 
-        result = await db.execute(stmt)
-        news = result.scalars().unique()
+        db_result = await db.execute(stmt)
+        news = db_result.scalars().unique()
         result = [
             NewsWithCategoriesSchema.model_validate(
                 news_item, from_attributes=True

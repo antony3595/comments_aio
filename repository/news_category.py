@@ -18,12 +18,16 @@ class NewsCategoryRepository:
     ) -> List[NewsCategorySchema]:
         news_id = values.news_id
         categories = values.categories
-        values = [
+        transformed_values = [
             {"news_id": news_id, "category": category}
             for category in categories
         ]
 
-        stmt = insert(NewsCategory).values(values).returning(NewsCategory)
+        stmt = (
+            insert(NewsCategory)
+            .values(transformed_values)
+            .returning(NewsCategory)
+        )
         db_result = await db.execute(stmt)
         news_categories = db_result.scalars().all()
 
