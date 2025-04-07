@@ -12,7 +12,10 @@ from repository.service_account import ServiceAccountRepository
 from schema.db.service_account import ServiceAccountSchema
 from schema.db.user import UserSchema
 from services.auth.authorizaton import AuthService, get_auth_service
-from services.auth.exceptions import AuthorizationException, AuthenticationException
+from services.auth.exceptions import (
+    AuthorizationException,
+    AuthenticationException,
+)
 
 token_header = APIKeyHeader(name="Authorization", scheme_name="Token")
 api_key_header = APIKeyHeader(name="X-API-KEY", scheme_name="X-API-KEY")
@@ -24,10 +27,11 @@ class ApiKeyAuth:
             raise HTTPException(status_code=403, detail="Invalid API key")
 
 
-async def jwt_token_auth(token: str = Security(token_header),
-                         auth_service: AuthService = Depends(get_auth_service),
-                         db: AsyncSession = Depends(get_db)
-                         ) -> UserSchema:
+async def jwt_token_auth(
+    token: str = Security(token_header),
+    auth_service: AuthService = Depends(get_auth_service),
+    db: AsyncSession = Depends(get_db),
+) -> UserSchema:
     try:
         user = await auth_service.validate_token(db, token, [])
         return user
@@ -42,13 +46,17 @@ class JWTTokenScopeAuth:
     def __init__(self, required_scope: List[Scope] = None):
         self.required_scope = required_scope
 
-    async def __call__(self, token: str = Security(token_header),
-                       db: AsyncSession = Depends(get_db),
-                       auth_service: AuthService = Depends(get_auth_service),
-                       ) -> UserSchema:
+    async def __call__(
+        self,
+        token: str = Security(token_header),
+        db: AsyncSession = Depends(get_db),
+        auth_service: AuthService = Depends(get_auth_service),
+    ) -> UserSchema:
 
         try:
-            user = await auth_service.validate_token(db, token, required_scope=self.required_scope)
+            user = await auth_service.validate_token(
+                db, token, required_scope=self.required_scope
+            )
             return user
 
         except AuthorizationException as e:
@@ -59,14 +67,20 @@ class JWTTokenScopeAuth:
 
 
 class ServiceAccountAuth:
-    async def __call__(self,
-                       token: str = Security(token_header),
-                       db: AsyncSession = Depends(get_db),
-                       ) -> ServiceAccountSchema:
+    async def __call__(
+        self,
+        token: str = Security(token_header),
+        db: AsyncSession = Depends(get_db),
+    ) -> ServiceAccountSchema:
         async with db.begin():
-            service_account = await ServiceAccountRepository().read_by_token(db, token)
+            service_account = await ServiceAccountRepository().read_by_token(
+                db, token
+            )
             await db.commit()
-        if service_account and service_account.token_valid_date > datetime.now():
+        if (
+            service_account
+            and service_account.token_valid_date > datetime.now()
+        ):
             return service_account
 
         raise HTTPException(detail="Unauthorized", status_code=401)

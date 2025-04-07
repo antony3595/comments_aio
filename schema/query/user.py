@@ -1,4 +1,10 @@
-from pydantic import EmailStr, BaseModel, model_validator, ValidationError, Field
+from pydantic import (
+    EmailStr,
+    BaseModel,
+    model_validator,
+    ValidationError,
+    Field,
+)
 
 from schema.db.user import UserFields
 

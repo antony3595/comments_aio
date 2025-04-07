@@ -1,5 +1,5 @@
 class BaseAppException(Exception):
-    default_message = 'An unknown error occurred.'
+    default_message = "An unknown error occurred."
 
     def __init__(self, message=None):
         message = message or self.default_message
@@ -7,9 +7,7 @@ class BaseAppException(Exception):
         self.message = f"{self.__class__.__name__}({message})"
 
 
-class BaseSchemaException(BaseAppException):
-    ...
+class BaseSchemaException(BaseAppException): ...
 
 
-class BaseServiceException(BaseAppException):
-    ...
+class BaseServiceException(BaseAppException): ...

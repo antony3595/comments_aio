@@ -26,7 +26,9 @@ async def process_stuck_raw_news() -> None:
         filters = RawNewsFiltersSchema(processed=False)
 
         pagination = PaginationSchema(page=1, size=10)
-        raw_news = await get_raw_news_service().read_all(db, filters=filters, pagination=pagination)
+        raw_news = await get_raw_news_service().read_all(
+            db, filters=filters, pagination=pagination
+        )
 
         for raw_news_item in raw_news:
             process_raw_news.delay(raw_news_item.id)

@@ -67,7 +67,9 @@ class AuthService:
             raise AuthenticationException(message="Forbidden")
 
         async with db.begin():
-            if user := await UserRepository().read(db, query=UserReadQuery(email=token_payload.email)):
+            if user := await UserRepository().read(
+                db, query=UserReadQuery(email=token_payload.email)
+            ):
                 return user
         raise AuthorizationException(message="No user with given token")
 

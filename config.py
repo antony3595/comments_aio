@@ -24,7 +24,9 @@ class Settings(BaseSettings):
     TOKEN_MAX_TTL: int = 3600
     API_KEY: SecretStr = "123"
     SECRET_KEY: SecretStr = "123"
-    DB_CONNECTION_STRING: SecretStr = "postgresql+asyncpg://user:password@localhost:5435/comments_aio_db"
+    DB_CONNECTION_STRING: SecretStr = (
+        "postgresql+asyncpg://user:password@localhost:5435/comments_aio_db"
+    )
     REDIS_URL: SecretStr = "redis://localhost:6379"
     TIMEZONE: str = "Asia/Bishkek"
 
