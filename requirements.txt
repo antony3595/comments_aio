@@ -1,4 +1,4 @@
-aiohttp==3.9.5
+aiohttp==3.10.11
 pydantic==2.8.2
 fastapi[all]
 requests
@@ -7,4 +7,6 @@ uvicorn[standard]
 SQLAlchemy==2.0.32
 alembic
 asyncpg
+celery==5.4.0
+redis==5.1.0
 black==25.1.0

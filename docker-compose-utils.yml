@@ -15,7 +15,26 @@ services:
       - POSTGRES_PASSWORD=password
     networks:
       comments_aio_network:
+    volumes:
+      - comments_aio_pg_data:/var/lib/postgresql/data
+
+  comments_aio_redis:
+    container_name: comments_aio_redis
+    restart: always
+    image: redis:5-alpine
+
+    environment:
+      - TZ=Asia/Bishkek
+    volumes:
+      - comments_aio_redis_data:/data
+    ports:
+      - 6379:6379
+    networks:
+      comments_aio_network:
 
 
 networks:
   comments_aio_network:
+volumes:
+  comments_aio_redis_data:
+  comments_aio_pg_data:

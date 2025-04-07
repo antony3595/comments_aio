@@ -66,10 +66,9 @@ class AuthService:
         if not has_scope:
             raise AuthenticationException(message="Forbidden")
 
-        if user := await UserRepository().read(
-            db, query=UserReadQuery(email=token_payload.email)
-        ):
-            return user
+        async with db.begin():
+            if user := await UserRepository().read(db, query=UserReadQuery(email=token_payload.email)):
+                return user
         raise AuthorizationException(message="No user with given token")
 
     def parse_token(self, token: str) -> TokenPayload:

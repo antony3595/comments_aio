@@ -1,30 +1,30 @@
 version: '3.3'
 
 services:
-  comments_aio_server:
-    build: .
-    container_name: comments_aio_server
-    environment:
-      - CONSUMERS_COUNT=10
-      - BLOGS_API_URL=https://jsonplaceholder.typicode.com
-    command: sh -c "python3.10 run_server.py"
-    networks:
-      comments_aio_network:
+#  comments_aio_server:
+#    build: .
+#    container_name: comments_aio_server
+#    environment:
+#      - CONSUMERS_COUNT=10
+#      - BLOGS_API_URL=https://jsonplaceholder.typicode.com
+#    command: sh -c "python3.10 run_server.py"
+#    networks:
+#      comments_aio_network:
 
-  comments_aio_client:
-    build: .
-    container_name: comments_aio_client
-    environment:
-      - TCP_SERVER_HOST=comments_aio_server
-      - TCP_SERVER_PORT=8888
-      - CONSUMERS_COUNT=10
-      - BLOGS_API_URL=https://jsonplaceholder.typicode.com
-    command: sh -c "python3.10 run_client.py"
-    networks:
-      comments_aio_network:
-    depends_on:
-      comments_aio_server:
-        condition: service_started
+#  comments_aio_client:
+#    build: .
+#    container_name: comments_aio_client
+#    environment:
+#      - TCP_SERVER_HOST=comments_aio_server
+#      - TCP_SERVER_PORT=8888
+#      - CONSUMERS_COUNT=10
+#      - BLOGS_API_URL=https://jsonplaceholder.typicode.com
+#    command: sh -c "python3.10 run_client.py"
+#    networks:
+#      comments_aio_network:
+#    depends_on:
+#      comments_aio_server:
+#        condition: service_started
 
 
   comments_aio_api:
@@ -35,9 +35,33 @@ services:
     environment:
       - DEBUG=true
       - DB_CONNECTION_STRING=postgresql+asyncpg://user:password@comments_aio_pg_12:5432/comments_aio_db
-
+      - REDIS_URL=redis://comments_aio_redis:6379
     ports:
       - "8000:8000"
+    networks:
+      comments_aio_network:
+
+
+  comments_aio_celery_workers:
+    build: .
+    command: sh -c "celery -A tasks.celery.app worker --loglevel=info --concurrency=1"
+    deploy:
+      replicas: 4
+    environment:
+      - DEBUG=true
+      - DB_CONNECTION_STRING=postgresql+asyncpg://user:password@comments_aio_pg_12:5432/comments_aio_db
+      - REDIS_URL=redis://comments_aio_redis:6379
+    networks:
+      comments_aio_network:
+
+
+  comments_aio_celery_beat:
+    build: .
+    command: sh -c "celery -A tasks.celery.app beat --loglevel=info"
+    environment:
+      - DEBUG=true
+      - DB_CONNECTION_STRING=postgresql+asyncpg://user:password@comments_aio_pg_12:5432/comments_aio_db
+      - REDIS_URL=redis://comments_aio_redis:6379
     networks:
       comments_aio_network:
 
