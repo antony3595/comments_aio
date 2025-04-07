@@ -15,7 +15,6 @@ app.conf.task_queues = [
     Queue("expired_service_accounts_queue")
 ]
 
-
 app.conf.beat_schedule = {
     "process_stuck_raw_news": {
         "task": "tasks.stuck_raw_news.process_stuck_raw_news_task",
