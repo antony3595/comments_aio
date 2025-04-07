@@ -23,6 +23,16 @@ class NewsRepository:
 
         return [NewsSchema.model_validate(news_item, from_attributes=True) for news_item in news]
 
+    async def read_extended_by_id(self, db: AsyncSession, news_id: int) -> NewsWithCategoriesSchema | None:
+        # TODO сделать categories листом
+        stmt = (select(News)
+                .where(News.id == news_id)
+                .options(joinedload(News.categories, innerjoin=True).load_only(NewsCategory.category)))
+
+        result = await db.execute(stmt)
+        news = result.scalars().unique().one_or_none()
+        return NewsWithCategoriesSchema.model_validate(news, from_attributes=True) if news else None
+
     async def read_all_extended(self, db: AsyncSession) -> List[NewsWithCategoriesSchema]:
         # TODO сделать categories листом
         stmt = select(News).options(joinedload(News.categories, innerjoin=True).load_only(NewsCategory.category))

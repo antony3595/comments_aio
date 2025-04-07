@@ -6,14 +6,10 @@ from pydantic import ValidationError
 __all__ = ["process_raw_news"]
 
 from db.connections.postgres_null_pool import get_null_pool_async_session
-from repository.news import get_news_repository
-from repository.news_category import get_news_category_repository
-
-from repository.raw_news import get_raw_news_repository
-from schema.db.news import CreateNewsSchema
-from schema.db.news_category import CreateNewsCategoriesSchema
 
 from schema.db.raw_news import UpdateRawNewsSchema
+from services.news.news_service import NewsService
+from services.raw_news.raw_news import RawNewsService
 from tasks.celery import app
 
 from tasks.push_notification import send_push_notification
@@ -28,23 +24,18 @@ def process_raw_news(raw_news_id: int) -> int:
 
 
 async def create_news_from_raw_news(raw_news_id: int) -> int:
-    # TODO use async_session()
     async with get_null_pool_async_session() as db:
-        raw_news_repository = get_raw_news_repository()
-        news_repository = get_news_repository()
-        news_category_repository = get_news_category_repository()
-        raw_news = await raw_news_repository.read(db, raw_news_id)
-        categories = raw_news.data.pop('categories')
+        raw_news_service = RawNewsService()
+        news_service = NewsService()
+
+        raw_news = await raw_news_service.get_by_id(db, raw_news_id)
 
         try:
-            news_values = CreateNewsSchema.model_validate(raw_news.data)
-            news = await news_repository.create(db, news_values)
-
-            news_categories_values = CreateNewsCategoriesSchema(news_id=news.id, categories=categories)
-            news_categories = await news_category_repository.create(db, news_categories_values)
+            news = await news_service.create_from_raw_news(db, raw_news)
+            categories = [c.category for c in news.categories]
             logging.info(f"raw news created successfully: news: {news.model_dump()}, categories={categories} raw={raw_news.model_dump()}")
 
-            subscribers = await news_category_repository.get_subscribed_users(db, categories=categories)
+            subscribers = await news_service.get_subsribers_by_categories(db, categories=categories)
 
             for subscriber in subscribers:
                 send_push_notification.delay(news.title, subscriber.id)
@@ -52,4 +43,4 @@ async def create_news_from_raw_news(raw_news_id: int) -> int:
         except ValidationError as e:
             logging.info(f"raw news processed with errors: {e.errors()}, raw={raw_news.model_dump()}")
         finally:
-            await raw_news_repository.update(db, raw_news_id, UpdateRawNewsSchema(processed=True))
+            await raw_news_service.update(db, raw_news_id, UpdateRawNewsSchema(processed=True))
