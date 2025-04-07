@@ -20,7 +20,6 @@ class UserRepository:
     async def get_subscriptions(self, db: AsyncSession, user_id: int) -> List[UserCategorySubscriptionSchema]:
         stmt = await db.execute(select(UserCategorySubscription).where(UserCategorySubscription.user_id == user_id))
         subscriptions = stmt.scalars().all()
-
         return [UserCategorySubscriptionSchema.model_validate(subscription, from_attributes=True) for subscription in subscriptions]
 
     async def create(self, db: AsyncSession, query: UserBaseSchema) -> UserSchema | None:
