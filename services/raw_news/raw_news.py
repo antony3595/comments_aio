@@ -3,7 +3,8 @@ from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repository.raw_news import get_raw_news_repository, RawNewsRepository
-from schema.db.raw_news import CreateRawNewsSchema, RawNewsSchema, UpdateRawNewsSchema
+from schema.db.base import PaginationSchema
+from schema.db.raw_news import CreateRawNewsSchema, RawNewsSchema, UpdateRawNewsSchema, RawNewsFiltersSchema
 
 
 class RawNewsService:
@@ -16,6 +17,14 @@ class RawNewsService:
             raw_news = await raw_news_repository.create(db, data)
             await db.commit()
             return raw_news
+
+    async def read_all(self, db: AsyncSession,
+                       filters: RawNewsFiltersSchema = None,
+                       pagination: PaginationSchema = None) -> List[RawNewsSchema]:
+        async with db.begin():
+            res = await get_raw_news_repository().read_all(db, filters, pagination)
+            await db.commit()
+            return res
 
     @staticmethod
     async def get_by_id(db: AsyncSession, raw_news_id: int) -> RawNewsSchema | None:
@@ -40,3 +49,7 @@ class RawNewsService:
             raw_news = await raw_news_repository.update(db, raw_news_id, values)
             await db.commit()
             return raw_news
+
+
+def get_raw_news_service() -> RawNewsService:
+    return RawNewsService()

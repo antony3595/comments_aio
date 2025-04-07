@@ -2,6 +2,14 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, Field
 
+from db.models.news import RawNews
+from schema.db.base import BaseSchema
+
+
+class RawNewsFiltersSchema(BaseSchema):
+    model = RawNews
+
+    processed: bool | None = Field(description="Is raw news processed or not")
 
 class BaseRawNewsSchema(BaseModel):
     data: Dict[str, Any] = Field(description="JSON data")
