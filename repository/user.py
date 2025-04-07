@@ -20,13 +20,11 @@ class UserRepository:
     async def get_subscriptions(self, db: AsyncSession, user_id: int) -> List[UserCategorySubscriptionSchema]:
         stmt = await db.execute(select(UserCategorySubscription).where(UserCategorySubscription.user_id == user_id))
         subscriptions = stmt.scalars().all()
-
         return [UserCategorySubscriptionSchema.model_validate(subscription, from_attributes=True) for subscription in subscriptions]
 
     async def create(self, db: AsyncSession, query: UserBaseSchema) -> UserSchema | None:
         stmt = await db.execute(insert(AuthUser).returning(AuthUser), query.model_dump())
         user = stmt.scalars().one_or_none()
-        await db.commit()
         return UserSchema.model_validate(user, from_attributes=True) if user else None
 
 

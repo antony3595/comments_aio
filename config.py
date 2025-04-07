@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     API_KEY: SecretStr = "123"
     SECRET_KEY: SecretStr = "123"
     DB_CONNECTION_STRING: SecretStr = "postgresql+asyncpg://user:password@localhost:5435/comments_aio_db"
+    REDIS_URL: SecretStr = "redis://localhost:6379"
+
 
 
 settings = Settings()

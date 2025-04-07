@@ -6,7 +6,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from api.dependencies.auth import ApiKeyAuth
-from api.routers import auth_router, news_router
+from api.routers import auth_router, news_router, ingest_router
 
 logger = logging.getLogger(__name__)
 
@@ -28,3 +28,4 @@ async def root():
 
 app.include_router(auth_router)
 app.include_router(news_router)
+app.include_router(ingest_router)

@@ -7,14 +7,19 @@ from db.models.news import NewsTypeEnum
 from schema.db.user import UserFields
 
 
+class InlineNewsCategorySchema(BaseModel):
+    category: NewsTypeEnum = Field(description="Category")
+
+
 class NewsFields:
     id: int = Field()
     title: str = Field(description="Title")
     created_at: datetime = Field(description="Created at")
+    categories: List[InlineNewsCategorySchema] = Field(description="Categories")
 
 
-class NewsCategorySchema(BaseModel):
-    category: NewsTypeEnum = Field(description="Category")
+class CreateNewsSchema(BaseModel):
+    title: str = NewsFields.title
 
 
 class NewsSchema(BaseModel):
@@ -24,7 +29,7 @@ class NewsSchema(BaseModel):
 
 
 class NewsWithCategoriesSchema(NewsSchema):
-    categories: List[NewsCategorySchema] | None
+    categories: List[InlineNewsCategorySchema] | None
 
 
 class NewsCategorySubscribeRequestSchema(BaseModel):
