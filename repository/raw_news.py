@@ -22,23 +22,17 @@ class RawNewsRepository:
         raw_news = result.scalars().one()
         return RawNewsSchema.model_validate(raw_news, from_attributes=True)
 
-    async def read(
-        self, db: AsyncSession, raw_news_id: int
-    ) -> RawNewsSchema | None:
+    async def read(self, db: AsyncSession, raw_news_id: int) -> RawNewsSchema:
         stmt = select(RawNews).where(RawNews.id == raw_news_id)
         result = await db.execute(stmt)
-        result = result.scalars().one_or_none()
-        return (
-            RawNewsSchema.model_validate(result, from_attributes=True)
-            if result
-            else None
-        )
+        result = result.scalars().one()
+        return RawNewsSchema.model_validate(result, from_attributes=True)
 
     async def read_all(
         self,
         db: AsyncSession,
-        filters: RawNewsFiltersSchema = None,
-        pagination: PaginationSchema = None,
+        filters: RawNewsFiltersSchema | None = None,
+        pagination: PaginationSchema | None = None,
     ) -> List[RawNewsSchema]:
 
         stmt = select(RawNews)

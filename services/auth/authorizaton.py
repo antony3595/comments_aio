@@ -38,7 +38,10 @@ class AuthService:
         return token
 
     async def validate_token(
-        self, db: AsyncSession, token: str, required_scope: List[Scope] = None
+        self,
+        db: AsyncSession,
+        token: str,
+        required_scope: List[Scope] | None = None,
     ) -> UserSchema:
 
         if not token:

@@ -51,7 +51,7 @@ class NewsService:
     async def get_user_subscriptions(
         db: AsyncSession,
         query: UserSubscriptionNewsQuery,
-        pagination: PaginationSchema = None,
+        pagination: PaginationSchema | None = None,
     ) -> List[NewsWithCategoriesSchema]:
         async with db.begin():
             result = await get_news_repository().get_user_subscription_news(
@@ -72,7 +72,7 @@ class NewsService:
 
     async def create_from_raw_news(
         self, db: AsyncSession, raw_news: RawNewsSchema
-    ) -> NewsWithCategoriesSchema | None:
+    ) -> NewsWithCategoriesSchema:
         news_repository = get_news_repository()
         async with db.begin():
             categories = raw_news.data.pop("categories", [])

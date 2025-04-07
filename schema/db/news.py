@@ -29,7 +29,9 @@ class NewsSchema(BaseModel):
 
 
 class NewsWithCategoriesSchema(NewsSchema):
-    categories: List[InlineNewsCategorySchema] | None
+    categories: List[InlineNewsCategorySchema] = Field(
+        description="Categories", default=[]
+    )
 
 
 class NewsCategorySubscribeRequestSchema(BaseModel):

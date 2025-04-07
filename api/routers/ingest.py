@@ -5,12 +5,11 @@ from typing import List, Any, Annotated
 from fastapi import APIRouter, Body
 from fastapi.params import Depends
 from pydantic import Json
-from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
 from starlette.status import HTTP_200_OK
 
 from api.dependencies.auth import ServiceAccountAuth
-from db.connections.postgres import get_db
+from db.connections.postgres import DBDependency
 from db.models.news import NewsTypeEnum
 from schema.db.service_account import ServiceAccountSchema
 from services.raw_news.raw_news import RawNewsService
@@ -35,11 +34,11 @@ def generate_fake_ingest_body():
 
 @ingest_router.post("/news")
 async def ingest_raw_news(
+    db: DBDependency,
     service_account: Annotated[
         ServiceAccountSchema, Depends(ServiceAccountAuth())
     ],
     body: List[Json[Any]] = Body(example=generate_fake_ingest_body()),
-    db: AsyncSession = Depends(get_db),
 ):
     logger.info(f"Ingesting raw news data {body}")
 

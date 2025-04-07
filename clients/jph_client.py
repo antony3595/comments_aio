@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, AsyncGenerator
 
 import config
 from clients.base import BaseAsyncHttpClient
@@ -46,7 +46,9 @@ class JsonPlaceholderClient(BaseAsyncHttpClient):
 
 
 @asynccontextmanager
-async def get_json_placeholder_client() -> JsonPlaceholderClient:
+async def get_json_placeholder_client() -> (
+    AsyncGenerator[JsonPlaceholderClient, None]
+):
     async with JsonPlaceholderClient(
         base_url=config.settings.BLOGS_API_URL
     ) as client:
