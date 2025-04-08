@@ -24,8 +24,8 @@ class RawNewsRepository:
 
     async def read(self, db: AsyncSession, raw_news_id: int) -> RawNewsSchema:
         stmt = select(RawNews).where(RawNews.id == raw_news_id)
-        result = await db.execute(stmt)
-        result = result.scalars().one()
+        db_result = await db.execute(stmt)
+        result = db_result.scalars().one()
         return RawNewsSchema.model_validate(result, from_attributes=True)
 
     async def read_all(
@@ -62,8 +62,8 @@ class RawNewsRepository:
             .values(values.model_dump(exclude_unset=True))
             .returning(RawNews)
         )
-        result = await db.execute(stmt)
-        result = result.scalars().one()
+        db_result = await db.execute(stmt)
+        result = db_result.scalars().one()
         return RawNewsSchema.model_validate(result, from_attributes=True)
 
     async def create_bulk(

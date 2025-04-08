@@ -9,7 +9,7 @@ from sqlalchemy import (
     Boolean,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column
 
 from db.models.base import BaseModel
 
@@ -35,8 +35,8 @@ class News(BaseModel):
 
 class NewsCategory(BaseModel):
     __tablename__ = "news_categories"
-    category = Column(Enum(NewsTypeEnum), nullable=False)
-    news_id = Column(ForeignKey("news.id"), nullable=False)
+    category = mapped_column(Enum(NewsTypeEnum), nullable=False)
+    news_id = mapped_column(ForeignKey("news.id"), nullable=False)
     news = relationship("News", back_populates="categories")
 
     __table_args__ = (UniqueConstraint(category, news_id),)
@@ -44,8 +44,8 @@ class NewsCategory(BaseModel):
 
 class UserCategorySubscription(BaseModel):
     __tablename__ = "users_categories_subscriptions"
-    category = Column(Enum(NewsTypeEnum), nullable=False)
-    user_id = Column(
+    category = mapped_column(Enum(NewsTypeEnum), nullable=False)
+    user_id = mapped_column(
         ForeignKey("auth_users.id", ondelete="CASCADE"), nullable=False
     )
     user = relationship("AuthUser", backref="categories")
@@ -57,7 +57,7 @@ class RawNews(BaseModel):
     __tablename__ = "raw_news"
     data = Column(JSONB, nullable=False)
     processed = Column(Boolean, nullable=False, default=False)
-    service_account_id = Column(
+    service_account_id = mapped_column(
         ForeignKey("service_accounts.id", ondelete="CASCADE"), nullable=False
     )
     service_account = relationship("ServiceAccount", back_populates="raw_news")
