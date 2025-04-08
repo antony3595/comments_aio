@@ -1,5 +1,5 @@
-### Форматирование кода через black
-```black --config .black ./```
+### Проверка кода
+```black --config .black --check --target-version py310 --diff ./```
 
 ### Запуск линтера MyPy
-```mypy ./```
+```mypy --ignore-missing-imports ./```
