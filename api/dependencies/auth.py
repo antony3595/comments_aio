@@ -15,6 +15,7 @@ from services.auth.exceptions import (
     AuthorizationException,
     AuthenticationException,
 )
+from services.cache.decorators import acached
 
 token_header = APIKeyHeader(name="Authorization", scheme_name="Token")
 api_key_header = APIKeyHeader(name="X-API-KEY", scheme_name="X-API-KEY")
@@ -65,7 +66,15 @@ class JWTTokenScopeAuth:
             raise HTTPException(detail=e.message, status_code=403)
 
 
+def build_cache_key(
+    *args, token: str = Security(token_header), **kwargs
+) -> str:
+    return f"ServiceAccounts:{token}"
+
+
 class ServiceAccountAuth:
+
+    @acached(key_builder=build_cache_key)
     async def __call__(
         self,
         db: DBDependency,
