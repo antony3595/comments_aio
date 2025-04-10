@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, AsyncGenerator
 
 import config
 from clients.base import BaseAsyncHttpClient
@@ -25,21 +25,31 @@ class JsonPlaceholderClient(BaseAsyncHttpClient):
         url = "/comments"
         method = "GET"
         params = {"postId": post_id}
-        response = await self._make_request(method, url, params=params, **kwargs)
+        response = await self._make_request(
+            method, url, params=params, **kwargs
+        )
         response_json = await response.json()
         comments = [Comment(**comment_dict) for comment_dict in response_json]
         return comments
 
-    async def partially_update_post(self, post: PostPatchDTO, **kwargs) -> PostPatchDTO:
+    async def partially_update_post(
+        self, post: PostPatchDTO, **kwargs
+    ) -> PostPatchDTO:
         url = f"/posts/{post.id}"
         method = "PATCH"
-        response = await self._make_request(method, url, data=post.model_dump(exclude_unset=True), **kwargs)
+        response = await self._make_request(
+            method, url, data=post.model_dump(exclude_unset=True), **kwargs
+        )
         response_json = await response.json()
         updated_post = PostPatchDTO(**response_json)
         return updated_post
 
 
 @asynccontextmanager
-async def get_json_placeholder_client() -> JsonPlaceholderClient:
-    async with JsonPlaceholderClient(base_url=config.settings.BLOGS_API_URL) as client:
+async def get_json_placeholder_client() -> (
+    AsyncGenerator[JsonPlaceholderClient, None]
+):
+    async with JsonPlaceholderClient(
+        base_url=config.settings.BLOGS_API_URL
+    ) as client:
         yield client

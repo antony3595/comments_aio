@@ -1,10 +1,15 @@
-from pydantic import EmailStr, BaseModel, model_validator, ValidationError, Field
+from pydantic import (
+    EmailStr,
+    BaseModel,
+    model_validator,
+    ValidationError,
+)
 
 from schema.db.user import UserFields
 
 
 class UserReadQuery(BaseModel):
-    id: int | None = Field(None, alias="id")
+    id: int | None = None
     email: EmailStr | None = UserFields.email
 
     @model_validator(mode="before")

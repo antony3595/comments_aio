@@ -23,16 +23,22 @@ class BaseAsyncHttpClient:
 
         params_str = urlencode(kwargs.get("params", {}))
         url_with_search_params = str(self.base_url) + url + "?" + params_str
-        logger.info(f"Sending request {method}:{url_with_search_params}, request_uuid={request_uuid}")
+        logger.info(
+            f"Sending request {method}:{url_with_search_params}, request_uuid={request_uuid}"
+        )
 
         try:
-            response = await self.session.request(method=method, url=url, **kwargs)
+            response = await self.session.request(
+                method=method, url=url, **kwargs
+            )
             response.raise_for_status()
-            logger.info(f"Got response with code {response.status} from {method}:{response.real_url}, uuid={request_uuid}")
+            logger.info(
+                f"Got response with code {response.status} from {method}:{response.real_url}, uuid={request_uuid}"
+            )
             return response
         except (
-                aiohttp.ClientError,
-                aiohttp.http_exceptions.HttpProcessingError,
+            aiohttp.ClientError,
+            aiohttp.http_exceptions.HttpProcessingError,
         ) as e:
             logger.error(
                 "aiohttp exception for %s [%s]: %s",

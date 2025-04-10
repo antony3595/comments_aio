@@ -11,7 +11,9 @@ from schema.tcp_server import ServerCommentRequestDTO
 logger = logging.getLogger(__name__)
 
 
-async def update_post_by_comment(post: ServerCommentRequestDTO) -> PostPatchDTO:
+async def update_post_by_comment(
+    post: ServerCommentRequestDTO,
+) -> PostPatchDTO:
     async with get_json_placeholder_client() as client:
         post_patch_dto = PostPatchDTO.model_validate({"id": post.postId})
         post_patch_dto.title = "Updated post title"
@@ -47,13 +49,18 @@ async def handle_request(reader, writer):
 
 
 async def main():
-    logger.info(f"Running server on {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}")
+    logger.info(
+        f"Running server on {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}"
+    )
 
     server = await asyncio.start_server(
-        handle_request, config.settings.TCP_SERVER_HOST, config.settings.TCP_SERVER_PORT)
+        handle_request,
+        config.settings.TCP_SERVER_HOST,
+        config.settings.TCP_SERVER_PORT,
+    )
     async with server:
         await server.serve_forever()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

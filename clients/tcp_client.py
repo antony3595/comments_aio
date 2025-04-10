@@ -10,9 +10,13 @@ logger = logging.getLogger(__name__)
 
 class TCPConnection:
     async def __aenter__(self):
-        logger.info(f"Opening TCP connection {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}")
+        logger.info(
+            f"Opening TCP connection {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}"
+        )
 
-        reader, writer = await asyncio.open_connection(config.settings.TCP_SERVER_HOST, config.settings.TCP_SERVER_PORT)
+        reader, writer = await asyncio.open_connection(
+            config.settings.TCP_SERVER_HOST, config.settings.TCP_SERVER_PORT
+        )
 
         self.reader = reader
         self.writer = writer
@@ -20,13 +24,17 @@ class TCPConnection:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.writer.close()
-        logger.info(f"Closing TCP connection {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}")
+        logger.info(
+            f"Closing TCP connection {config.settings.TCP_SERVER_HOST}:{config.settings.TCP_SERVER_PORT}"
+        )
         await self.writer.wait_closed()
 
 
 class TCPServerClient:
     async def update_post_by_comment(self, comment: Comment) -> Post:
-        dto = ClientCommentRequestDTO(**comment.model_dump(include={'postId', 'id', 'email'}))
+        dto = ClientCommentRequestDTO(
+            **comment.model_dump(include={"postId", "id", "email"})
+        )
 
         async with TCPConnection() as conn:
             conn.writer.write(dto.model_dump_json().encode())
