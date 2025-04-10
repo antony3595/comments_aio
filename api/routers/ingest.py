@@ -12,6 +12,7 @@ from api.dependencies.auth import ServiceAccountAuth
 from db.connections.postgres import DBDependency
 from db.models.news import NewsTypeEnum
 from schema.db.service_account import ServiceAccountSchema
+from services.pubsub_logging.service import get_pub_sub_logging_service
 from services.raw_news.raw_news import RawNewsService
 from tasks.raw_news import process_raw_news
 
@@ -47,6 +48,9 @@ async def ingest_raw_news(
         db=db, service_account_id=service_account.id, raw_news_data_values=body
     )
 
+    await get_pub_sub_logging_service().log(
+        "news", f"Пришло {len(results)} сырых новостей на обработку"
+    )
     for raw_news in results:
         process_raw_news.delay(raw_news.id)
 
