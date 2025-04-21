@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     )
     REDIS_URL: SecretStr = SecretStr("redis://localhost:6379")
     TIMEZONE: str = "Asia/Bishkek"
+    CACHE_VALUE_DEFAULT_TTL: int = 6000
 
 
 settings = Settings()
-pprint(settings.dict())
