@@ -11,3 +11,4 @@ celery==5.4.0
 redis==5.1.0
 black==25.1.0
 mypy==1.15.0
+click==8.1.7
