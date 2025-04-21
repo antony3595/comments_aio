@@ -10,6 +10,9 @@ class NewsCategorySchema(BaseModel):
     id: int = Field(description="ID")
     category: NewsTypeEnum = Field(description="Category")
 
+
 class CreateNewsCategoriesSchema(BaseModel):
     news_id: int = NewsFields.id
-    categories: List[NewsTypeEnum] = Field(description="Categories list", examples=[e.value for e in NewsTypeEnum])
+    categories: List[NewsTypeEnum] = Field(
+        description="Categories list", examples=[e.value for e in NewsTypeEnum]
+    )

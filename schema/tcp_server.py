@@ -16,7 +16,9 @@ class ServerCommentRequestDTO(ClientCommentRequestDTO):
     def id_not_reserved_validator(cls, v):
         reserved_ids = cls.RESERVED_IDS
         if v in reserved_ids:
-            raise ValueError(f"id \"{v}\" are reserved. Reserved ids: {reserved_ids}")
+            raise ValueError(
+                f'id "{v}" are reserved. Reserved ids: {reserved_ids}'
+            )
         return v
 
     @field_validator("id")

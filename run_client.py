@@ -39,7 +39,8 @@ async def process_post_comments(post: Post, queue: asyncio.Queue):
             comments = await client.get_post_comments(post.id)
         except Exception as e:
             logger.exception(
-                "Non-aiohttp exception occured:  %s", getattr(e, "__dict__", {})
+                "Non-aiohttp exception occured:  %s",
+                getattr(e, "__dict__", {}),
             )
 
     producers = [produce_comment(comment, queue) for comment in comments]
@@ -47,7 +48,10 @@ async def process_post_comments(post: Post, queue: asyncio.Queue):
 
 
 async def start_consumers(queue: asyncio.Queue):
-    consumers = [asyncio.create_task(consume_comments(queue)) for n in range(int(config.settings.CONSUMERS_COUNT))]
+    consumers = [
+        asyncio.create_task(consume_comments(queue))
+        for n in range(int(config.settings.CONSUMERS_COUNT))
+    ]
     logger.info(f"Starting {config.settings.CONSUMERS_COUNT} consumers")
     return consumers
 
@@ -72,5 +76,5 @@ async def main():
     logger.info(f"Program completed in {duration:0.2f} seconds.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
