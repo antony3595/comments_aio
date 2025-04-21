@@ -14,7 +14,7 @@ class RedisClient:
         return self.client
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.client.close()
+        await self.client.aclose()
 
     def get_client(self) -> redis.Redis:
         return redis.from_url(self.connection_string.get_secret_value())

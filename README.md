@@ -3,3 +3,6 @@
 
 ### Запуск линтера "MyPy"
 ```mypy --ignore-missing-imports ./```
+
+### Запуск логов
+```python -m cli.logs http news```

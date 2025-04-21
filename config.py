@@ -33,4 +33,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-pprint(settings.dict())
