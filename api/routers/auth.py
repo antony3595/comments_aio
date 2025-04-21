@@ -1,10 +1,9 @@
 import logging
 
 from fastapi import APIRouter, Depends, Body
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies.auth import ApiKeyAuth
-from db.connections.postgres import get_db
+from db.connections.postgres import DBDependency
 from schema.api.auth import (
     UserTokenResponse,
     UserTokenRequest,
@@ -23,7 +22,8 @@ auth_router = APIRouter(prefix="/auth")
     "/", response_model=UserTokenResponse, dependencies=[Depends(ApiKeyAuth)]
 )
 async def auth(
-    data: UserTokenRequest = Body(), db: AsyncSession = Depends(get_db)
+    db: DBDependency,
+    data: UserTokenRequest = Body(),
 ) -> UserTokenResponse:
     user_service = get_user_service()
 

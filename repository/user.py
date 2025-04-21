@@ -12,20 +12,14 @@ from schema.query.user import UserReadQuery
 
 
 class UserRepository:
-    async def read(
-        self, db: AsyncSession, query: UserReadQuery
-    ) -> UserSchema | None:
+    async def read(self, db: AsyncSession, query: UserReadQuery) -> UserSchema:
         stmt = await db.execute(
             select(AuthUser).where(
                 or_(AuthUser.email == query.email, AuthUser.id == query.id)
             )
         )
-        user = stmt.scalars().one_or_none()
-        return (
-            UserSchema.model_validate(user, from_attributes=True)
-            if user
-            else None
-        )
+        user = stmt.scalars().one()
+        return UserSchema.model_validate(user, from_attributes=True)
 
     async def get_subscriptions(
         self, db: AsyncSession, user_id: int
@@ -45,16 +39,12 @@ class UserRepository:
 
     async def create(
         self, db: AsyncSession, query: UserBaseSchema
-    ) -> UserSchema | None:
+    ) -> UserSchema:
         stmt = await db.execute(
             insert(AuthUser).returning(AuthUser), query.model_dump()
         )
-        user = stmt.scalars().one_or_none()
-        return (
-            UserSchema.model_validate(user, from_attributes=True)
-            if user
-            else None
-        )
+        user = stmt.scalars().one()
+        return UserSchema.model_validate(user, from_attributes=True)
 
 
 def get_user_repository() -> UserRepository:

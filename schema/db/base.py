@@ -7,7 +7,7 @@ from services.common.exceptions import BaseSchemaException
 
 
 class BaseSchema(BaseModel):
-    model: ClassVar[BaseOrmModel] = None
+    model: ClassVar[type[BaseOrmModel] | None] = None
 
     def to_orm_filters(self, raise_on_wrong_attribute=True) -> Dict[str, Any]:
         """Works only for equal cases for now"""
